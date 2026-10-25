@@ -159,13 +159,14 @@
 
       <!-- ===== Layer 3: Glass Window (z:15) ===== -->
       <div class="glass-layer" v-once>
-        <div class="glass-drop" v-for="n in 40" :key="'drop-'+n"
+        <div class="glass-drop" v-for="n in 20" :key="'drop-'+n"
              :style="{
                left: `${3 + Math.random()*94}%`,
                '--drop-size': `${3 + Math.random()*5}px`,
                '--drip-length': `${10 + Math.random()*25}px`,
-               '--drop-dur': `${14 + Math.random()*22}s`,
-               animationDelay: `${-Math.random()*30}s`
+               '--drop-dur': `${30 + Math.random()*35}s`,
+               '--trail-len': `${15 + Math.random()*40}px`,
+               animationDelay: `${-Math.random()*50}s`
              }"
              :class="{ dripping: n % 5 === 0 }">
         </div>
