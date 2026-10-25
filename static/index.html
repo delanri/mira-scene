@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Mira — A Rainy Night</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div id="app">
+    <div class="scene" :class="[`bg-${sceneBackground}`, { 'lightning-flash': isLightning }]">
+
+      <!-- Shop Interior warm glow (behind glass) -->
+      <div class="shop-interior">
+        <div class="ambient-light" :class="{ flicker: isFlickering }"></div>
+      </div>
+
+      <!-- Character + Table (inside the shop, behind glass) -->
+      <div class="character-area">
+        <div class="character-container" :class="[currentEmotion, currentAction, characterState]">
+          <div class="character-body">
+            <div class="character-head">
+              <div class="hair"></div>
+              <div class="hair-clip">★</div>
+              <div class="face">
+                <div class="eyes">
+                  <div class="eye left" :class="{ closed: isBlinking }"></div>
+                  <div class="eye right" :class="{ closed: isBlinking }"></div>
+                </div>
+                <div class="mouth" :class="[mouthState]"></div>
+              </div>
+            </div>
+            <div class="character-torso">
+              <div class="raincoat"></div>
+              <div class="hand left-hand"></div>
+              <div class="hand right-hand"></div>
+            </div>
+          </div>
+
+          <!-- Cafe table with coffee cup -->
+          <div class="cafe-table">
+            <div class="coffee-cup">
+              <div class="steam"></div>
+            </div>
+          </div>
+
+          <!-- Emotion particles -->
+          <div class="emotion-particles" v-if="showParticles">
+            <span v-for="n in 5" :key="n" class="particle"
+                  :style="{ animationDelay: `${n * 0.15}s` }">
+              {{ emotionParticle }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Photo overlay -->
+        <div class="photo-overlay" v-if="showPhoto" @click="showPhoto = false">
+          <div class="polaroid">
+            <div class="photo-image">
+              <div class="aurora-scene">
+                <div class="aurora"></div>
+                <div class="mountains"></div>
+                <div class="stars" v-for="n in 12" :key="n"
+                     :style="{ left: `${Math.random()*100}%`, top: `${Math.random()*60}%`, animationDelay: `${Math.random()*3}s` }">
+                </div>
+              </div>
+            </div>
+            <p class="photo-caption">Iceland, last month — Northern Lights over black sand</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Glass Window Layer (the pane between us and the shop) -->
+      <div class="glass-layer">
+        <div class="glass-drop" v-for="n in 40" :key="'drop-'+n"
+             :style="{
+               left: `${5 + Math.random()*90}%`,
+               top: `${5 + Math.random()*85}%`,
+               '--drop-size': `${2 + Math.random()*5}px`,
+               '--drip-length': `${10 + Math.random()*25}px`,
+               animationDelay: `${Math.random()*5}s`
+             }"
+             :class="{ dripping: n % 5 === 0 }">
+        </div>
+        <div class="condensation"></div>
+      </div>
+
+      <!-- Rain (our side, in front of glass) -->
+      <div class="rain-container" :class="{ heavy: sceneBackground === 'rain_heavy' }">
+        <div class="rain-drop" v-for="n in 60" :key="n"
+             :style="{ left: `${Math.random()*100}%`, animationDelay: `${Math.random()*2}s`, animationDuration: `${0.4 + Math.random()*0.4}s` }">
+        </div>
+      </div>
+
+      <!-- Status Badge (UI, our side) -->
+      <div class="status-badge" :class="characterState">
+        <span class="status-dot"></span>
+        <span class="status-text">{{ statusText }}</span>
+      </div>
+
+      <!-- Subtitle Area -->
+      <div class="subtitle-area" v-if="currentSubtitle">
+        <div class="subtitle-box" :class="{ 'typing': isTypingSubtitle }">
+          <span class="subtitle-name">Mira</span>
+          <p class="subtitle-text">{{ displayedSubtitle }}</p>
+        </div>
+      </div>
+
+      <!-- Input Area -->
+      <div class="input-area">
+        <div class="input-container">
+          <input
+            type="text"
+            v-model="userInput"
+            @keydown.enter="sendMessage"
+            :placeholder="inputPlaceholder"
+            :disabled="characterState === 'thinking'"
+            ref="textInput"
+            class="text-input"
+          >
+          <button
+            class="send-btn"
+            @click="sendMessage"
+            :disabled="!userInput.trim() || characterState === 'thinking'"
+            v-if="userInput.trim()"
+          >
+            <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+              <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+            </svg>
+          </button>
+          <button
+            class="mic-btn"
+            :class="{ recording: isRecording, pulse: isRecording }"
+            @mousedown="startRecording"
+            @mouseup="stopRecording"
+            @touchstart.prevent="startRecording"
+            @touchend.prevent="stopRecording"
+            v-if="!userInput.trim()"
+            :title="isRecording ? 'Release to send' : 'Hold to speak'"
+          >
+            <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+              <path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/>
+            </svg>
+          </button>
+        </div>
+        <!-- Interrupt hint -->
+        <div class="interrupt-hint" v-if="characterState === 'speaking'">
+          Tap mic or type to interrupt
+        </div>
+        <!-- Mode badge -->
+        <div class="mode-badge">{{ apiMode === 'mock' ? 'DEMO' : 'LIVE' }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vue 3 CDN -->
+  <script src="https://unpkg.com/vue@3.4.38/dist/vue.global.prod.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>

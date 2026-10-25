@@ -1,0 +1,1185 @@
+/* ========================================
+   Mira Scene — Through the Glass
+   Rainy night, looking in from outside
+   Layout: 0-20% sky | 20-58% character | 58-60% gap | 63-80% subtitle | 85-100% input
+   ======================================== */
+
+/* === Reset & Base === */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  /* Night outside */
+  --night-dark: #0a0c12;
+  --night-mid: #141822;
+  /* Warm interior light leaking through glass */
+  --glow-warm: rgba(205, 150, 60, 0.30);
+  --glow-center: rgba(235, 190, 95, 0.22);
+  /* Glass */
+  --glass-tint: rgba(160, 185, 210, 0.06);
+  --glass-edge-fog: rgba(180, 200, 220, 0.25);
+  /* Rain */
+  --rain-color: rgba(174, 200, 235, 0.55);
+  /* Interior warm palette */
+  --interior-bg: #2a1f14;
+  --interior-glow: rgba(215, 165, 70, 0.50);
+  --table-color: #3d2b18;
+  --table-highlight: #5a3f25;
+  /* Character */
+  --skin: #f0d5b8;
+  --skin-shadow: #d4b494;
+  --hair-dark: #1a1a2e;
+  --hair-highlight: #2d2d4a;
+  --raincoat-main: #c9a84c;
+  --raincoat-shadow: #a8893a;
+  --raincoat-highlight: #e0c060;
+  --clip-color: #e8c84c;
+  --eye-color: #2d2d4a;
+  --mouth-color: #c48a70;
+  /* Coffee */
+  --cup-body: #f5f0e8;
+  --cup-shadow: #d4c8b0;
+  --coffee-liquid: #3a2510;
+  --steam-color: rgba(255, 255, 255, 0.25);
+  /* UI */
+  --text-primary: rgba(255, 255, 255, 0.92);
+  --text-secondary: rgba(255, 255, 255, 0.6);
+  --input-bg: rgba(20, 20, 30, 0.75);
+  --input-border: rgba(255, 255, 255, 0.12);
+  --accent: #c9a84c;
+  --accent-glow: rgba(201, 168, 76, 0.3);
+}
+
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  background: var(--night-dark);
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#app { height: 100%; }
+
+/* === Scene (fullscreen) === */
+.scene {
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 65% 55% at 50% 42%,
+      var(--glow-center) 0%,
+      var(--glow-warm) 30%,
+      transparent 70%),
+    linear-gradient(175deg, #0d1018 0%, var(--night-dark) 40%, #0e1119 100%);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+/* Vignette — dark edges like a window frame */
+.scene::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 28;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 75% 70% at 50% 45%,
+      transparent 40%,
+      rgba(5, 7, 12, 0.4) 70%,
+      rgba(5, 7, 12, 0.85) 100%);
+}
+
+/* Lightning flash */
+.scene.lightning-flash::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 27;
+  pointer-events: none;
+  background: rgba(200, 210, 240, 0.15);
+  animation: lightning-fade 0.6s ease-out forwards;
+}
+
+@keyframes lightning-fade {
+  0% { opacity: 1; }
+  15% { opacity: 0.6; }
+  30% { opacity: 0.9; }
+  100% { opacity: 0; }
+}
+
+/* === Shop Interior (behind glass, z-index 5) === */
+/* Repositioned to cover character zone with warm glow */
+.shop-interior {
+  position: absolute;
+  top: 12%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 420px;
+  bottom: 32%;
+  z-index: 5;
+  background:
+    radial-gradient(ellipse 80% 70% at 50% 40%,
+      rgba(210, 160, 75, 0.14) 0%,
+      rgba(180, 135, 60, 0.08) 50%,
+      transparent 100%);
+  border-radius: 4px 4px 0 0;
+  pointer-events: none;
+}
+
+.ambient-light {
+  position: absolute;
+  top: 5%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 260px;
+  height: 260px;
+  border-radius: 50%;
+  background: radial-gradient(circle,
+    rgba(235, 195, 105, 0.20) 0%,
+    rgba(215, 175, 90, 0.12) 35%,
+    rgba(200, 160, 80, 0.05) 55%,
+    transparent 70%);
+  animation: ambient-pulse 8s ease-in-out infinite;
+}
+
+.ambient-light.flicker {
+  animation: flicker-anim 1.5s ease-in-out;
+}
+
+@keyframes ambient-pulse {
+  0%, 100% { opacity: 0.8; transform: translateX(-50%) scale(1); }
+  50% { opacity: 1; transform: translateX(-50%) scale(1.08); }
+}
+
+@keyframes flicker-anim {
+  0% { opacity: 1; }
+  10% { opacity: 0.2; }
+  20% { opacity: 0.8; }
+  30% { opacity: 0.1; }
+  40% { opacity: 0.6; }
+  50% { opacity: 0.15; }
+  60% { opacity: 0.9; }
+  70% { opacity: 0.3; }
+  80% { opacity: 0.85; }
+  100% { opacity: 1; }
+}
+
+/* === Character Area (inside shop, z-index 10) === */
+/* Top-anchored: 20% to 58% of viewport */
+.character-area {
+  position: absolute;
+  top: 20%;
+  bottom: 42%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 300px;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  pointer-events: none;
+}
+
+.character-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: transform 0.4s ease;
+}
+
+.character-body {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* --- Head (scaled up for C-size) --- */
+.character-head {
+  position: relative;
+  width: 76px;
+  height: 84px;
+  z-index: 2;
+}
+
+.face {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 68px;
+  background: var(--skin);
+  border-radius: 50% 50% 48% 48%;
+  z-index: 1;
+  box-shadow: inset -3px -2px 6px var(--skin-shadow);
+}
+
+.hair {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 78px;
+  height: 48px;
+  background: var(--hair-dark);
+  border-radius: 50% 50% 30% 30%;
+  z-index: 2;
+  box-shadow:
+    inset 3px 2px 4px var(--hair-highlight),
+    0 -2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Side bangs */
+.hair::before,
+.hair::after {
+  content: '';
+  position: absolute;
+  bottom: -14px;
+  width: 12px;
+  height: 24px;
+  background: var(--hair-dark);
+  border-radius: 0 0 50% 50%;
+}
+
+.hair::before { left: 2px; }
+.hair::after { right: 2px; }
+
+.hair-clip {
+  position: absolute;
+  top: 22px;
+  right: 2px;
+  font-size: 12px;
+  color: var(--clip-color);
+  z-index: 3;
+  filter: drop-shadow(0 0 3px rgba(232, 200, 76, 0.5));
+  transition: transform 0.3s ease;
+}
+
+/* --- Eyes (scaled) --- */
+.eyes {
+  position: absolute;
+  top: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 13px;
+  z-index: 2;
+}
+
+.eye {
+  width: 7px;
+  height: 8px;
+  background: var(--eye-color);
+  border-radius: 50%;
+  transition: all 0.15s ease;
+  position: relative;
+}
+
+.eye::after {
+  content: '';
+  position: absolute;
+  top: 1px;
+  left: 2px;
+  width: 2.5px;
+  height: 2.5px;
+  background: white;
+  border-radius: 50%;
+  opacity: 0.8;
+}
+
+.eye.closed {
+  height: 2px;
+  border-radius: 2px;
+}
+.eye.closed::after { opacity: 0; }
+
+/* --- Mouth (scaled) --- */
+.mouth {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 9px;
+  height: 4px;
+  background: var(--mouth-color);
+  border-radius: 0 0 50% 50%;
+  z-index: 2;
+  transition: all 0.2s ease;
+}
+
+.mouth.speaking-mouth {
+  animation: mouth-move 0.3s ease-in-out infinite alternate;
+}
+
+.mouth.smile {
+  width: 11px;
+  height: 5px;
+  border-radius: 0 0 50% 50%;
+  background: var(--mouth-color);
+}
+
+.mouth.slight {
+  width: 8px;
+  height: 2px;
+  border-radius: 2px;
+  opacity: 0.7;
+}
+
+.mouth.open {
+  width: 8px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+@keyframes mouth-move {
+  0% { height: 3px; width: 8px; }
+  100% { height: 6px; width: 9px; border-radius: 40%; }
+}
+
+/* --- Torso (bigger, sits right above table) --- */
+.character-torso {
+  position: relative;
+  width: 88px;
+  height: 120px;
+  margin-top: -4px;
+  z-index: 1;
+}
+
+.raincoat {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(175deg, var(--raincoat-highlight) 0%, var(--raincoat-main) 40%, var(--raincoat-shadow) 100%);
+  clip-path: polygon(15% 0%, 85% 0%, 95% 100%, 5% 100%);
+  border-radius: 0 0 4px 4px;
+}
+
+/* Collar */
+.raincoat::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 34px;
+  height: 12px;
+  background: var(--raincoat-shadow);
+  border-radius: 0 0 8px 8px;
+}
+
+/* --- Hands (circles resting on table edge) --- */
+.hand {
+  position: absolute;
+  bottom: -5px;
+  width: 17px;
+  height: 17px;
+  background: var(--skin);
+  border-radius: 50%;
+  z-index: 3;
+  box-shadow: inset -1px -1px 3px var(--skin-shadow);
+  transition: transform 0.5s ease, bottom 0.5s ease;
+}
+
+.left-hand {
+  left: 5px;
+}
+
+.right-hand {
+  right: 5px;
+}
+
+/* Action: touch hair clip — left hand moves up */
+.character-container.touch_hair_clip .left-hand {
+  transform: translateY(-100px) translateX(10px);
+}
+
+/* Action: sip coffee — right hand moves to cup */
+.character-container.sip_coffee .right-hand {
+  transform: translateY(8px) translateX(-8px);
+}
+
+/* === Cafe Table === */
+/* Sits directly below character body — no gap */
+.cafe-table {
+  position: relative;
+  width: 240px;
+  height: 7px;
+  background: linear-gradient(180deg, var(--table-highlight) 0%, var(--table-color) 100%);
+  border-radius: 2px;
+  margin-top: -2px;
+  z-index: 2;
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+/* Table edge highlight */
+.cafe-table::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 10%;
+  width: 80%;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* --- Coffee Cup on table --- */
+.coffee-cup {
+  position: absolute;
+  right: 28px;
+  top: -18px;
+  width: 18px;
+  height: 16px;
+  background: var(--cup-body);
+  border-radius: 0 0 3px 3px;
+  z-index: 3;
+  box-shadow:
+    inset -2px 0 3px var(--cup-shadow),
+    0 1px 3px rgba(0, 0, 0, 0.3);
+  transition: transform 0.4s ease;
+}
+
+/* Cup rim */
+.coffee-cup::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -1px;
+  width: 20px;
+  height: 4px;
+  background: var(--cup-body);
+  border-radius: 2px;
+  box-shadow: inset 0 2px 2px var(--cup-shadow);
+}
+
+/* Cup handle */
+.coffee-cup::after {
+  content: '';
+  position: absolute;
+  right: -6px;
+  top: 3px;
+  width: 6px;
+  height: 9px;
+  border: 2px solid var(--cup-body);
+  border-left: none;
+  border-radius: 0 4px 4px 0;
+}
+
+/* Coffee liquid visible at top */
+.steam {
+  position: absolute;
+  top: 0;
+  left: 2px;
+  width: 14px;
+  height: 3px;
+  background: var(--coffee-liquid);
+  border-radius: 1px;
+  z-index: 1;
+}
+
+/* Steam wisps above cup */
+.steam::before,
+.steam::after {
+  content: '';
+  position: absolute;
+  bottom: 10px;
+  width: 2px;
+  height: 14px;
+  background: var(--steam-color);
+  border-radius: 50%;
+  animation: steam-rise 2.5s ease-in-out infinite;
+}
+
+.steam::before {
+  left: 3px;
+  animation-delay: 0s;
+}
+
+.steam::after {
+  left: 8px;
+  animation-delay: 1s;
+  height: 11px;
+}
+
+@keyframes steam-rise {
+  0% { opacity: 0; transform: translateY(0) scaleX(1); }
+  30% { opacity: 0.6; }
+  60% { opacity: 0.3; transform: translateY(-16px) scaleX(1.5); }
+  100% { opacity: 0; transform: translateY(-24px) scaleX(0.5); }
+}
+
+/* Sip coffee — cup lifts slightly */
+.character-container.sip_coffee .coffee-cup {
+  transform: translateY(-4px) rotate(-5deg);
+}
+
+/* === Emotion Particles === */
+.emotion-particles {
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  pointer-events: none;
+  z-index: 5;
+}
+
+.particle {
+  position: absolute;
+  font-size: 14px;
+  opacity: 0;
+  animation: particle-float 1.5s ease-out forwards;
+}
+
+@keyframes particle-float {
+  0% { opacity: 0; transform: translate(0, 0) scale(0.5); }
+  30% { opacity: 1; transform: translate(var(--px, 10px), -15px) scale(1); }
+  100% { opacity: 0; transform: translate(var(--px, 10px), -35px) scale(0.3); }
+}
+
+.particle:nth-child(1) { --px: -22px; }
+.particle:nth-child(2) { --px: 14px; }
+.particle:nth-child(3) { --px: -10px; }
+.particle:nth-child(4) { --px: 24px; }
+.particle:nth-child(5) { --px: 0px; }
+
+/* === Character States === */
+/* Thinking — slight sway */
+.character-container.thinking {
+  animation: think-sway 3s ease-in-out infinite;
+}
+
+@keyframes think-sway {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-1deg); }
+  75% { transform: rotate(1deg); }
+}
+
+/* Listening — lean forward slightly */
+.character-container.listening {
+  transform: translateY(-3px);
+}
+
+/* Speaking — subtle movement */
+.character-container.speaking {
+  animation: speak-bob 2s ease-in-out infinite;
+}
+
+@keyframes speak-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+
+/* === Emotion States === */
+.character-container.happy {
+  transform: rotate(-1deg);
+}
+.character-container.happy .hair-clip {
+  transform: rotate(10deg) scale(1.1);
+  filter: drop-shadow(0 0 6px rgba(232, 200, 76, 0.7));
+}
+
+.character-container.melancholy {
+  transform: translateY(2px);
+}
+.character-container.melancholy .eye {
+  height: 5px;
+  opacity: 0.7;
+}
+
+.character-container.surprised .eye {
+  width: 9px;
+  height: 10px;
+}
+
+.character-container.curious {
+  transform: rotate(3deg);
+}
+.character-container.curious .eye.right {
+  width: 8px;
+  height: 9px;
+}
+
+/* === Glass Layer (z-index 15) === */
+.glass-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 15;
+  pointer-events: none;
+  background: var(--glass-tint);
+}
+
+/* Condensation — foggy at edges, clearer in center */
+.condensation {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 55% 50% at 50% 45%,
+      transparent 30%,
+      rgba(180, 200, 220, 0.08) 55%,
+      rgba(160, 185, 210, 0.18) 75%,
+      rgba(140, 170, 200, 0.28) 100%);
+}
+
+/* Extra fog at corners */
+.condensation::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 5% 8%, rgba(180, 200, 220, 0.2) 0%, transparent 25%),
+    radial-gradient(circle at 92% 12%, rgba(180, 200, 220, 0.18) 0%, transparent 20%),
+    radial-gradient(circle at 8% 88%, rgba(180, 200, 220, 0.22) 0%, transparent 22%),
+    radial-gradient(circle at 95% 85%, rgba(180, 200, 220, 0.16) 0%, transparent 18%);
+}
+
+/* Water drops on glass */
+.glass-drop {
+  position: absolute;
+  width: var(--drop-size, 4px);
+  height: var(--drop-size, 4px);
+  background: radial-gradient(circle at 35% 35%,
+    rgba(255, 255, 255, 0.35) 0%,
+    rgba(200, 220, 240, 0.15) 50%,
+    rgba(180, 200, 220, 0.08) 100%);
+  border-radius: 50%;
+  border: 0.5px solid rgba(255, 255, 255, 0.08);
+  animation: drop-shimmer 4s ease-in-out infinite;
+}
+
+/* Dripping drops — elongated with tail */
+.glass-drop.dripping {
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  animation: drop-drip 6s ease-in-out infinite;
+}
+
+.glass-drop.dripping::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 1px;
+  height: var(--drip-length, 15px);
+  background: linear-gradient(180deg,
+    rgba(200, 220, 240, 0.15) 0%,
+    transparent 100%);
+}
+
+@keyframes drop-shimmer {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
+
+@keyframes drop-drip {
+  0%, 100% {
+    transform: translateY(0);
+    opacity: 0.8;
+  }
+  40% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  80% {
+    transform: translateY(8px);
+    opacity: 0.5;
+  }
+}
+
+/* === Rain (our side, z-index 22) === */
+.rain-container {
+  position: absolute;
+  inset: 0;
+  z-index: 22;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.rain-drop {
+  position: absolute;
+  top: -30px;
+  width: 1.5px;
+  height: 22px;
+  background: linear-gradient(180deg,
+    transparent 0%,
+    var(--rain-color) 40%,
+    rgba(200, 220, 245, 0.3) 100%);
+  animation: rain-fall 0.6s linear infinite;
+  border-radius: 0 0 2px 2px;
+}
+
+/* Heavy rain */
+.rain-container.heavy .rain-drop {
+  height: 28px;
+  width: 2px;
+  animation-duration: 0.45s;
+}
+
+@keyframes rain-fall {
+  0% { transform: translateY(-30px); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 0.7; }
+  100% { transform: translateY(105vh); opacity: 0; }
+}
+
+/* Background variants */
+.scene.bg-rain_heavy .shop-interior {
+  opacity: 0.85;
+}
+
+.scene.bg-warm_interior .shop-interior {
+  background:
+    radial-gradient(ellipse 80% 70% at 50% 40%,
+      rgba(210, 160, 75, 0.22) 0%,
+      rgba(180, 135, 60, 0.14) 50%,
+      transparent 100%);
+}
+
+/* === Photo Overlay === */
+.photo-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  animation: photo-fade-in 0.5s ease;
+  pointer-events: auto;
+}
+
+@keyframes photo-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.polaroid {
+  background: #faf8f2;
+  padding: 12px 12px 40px 12px;
+  border-radius: 2px;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+  transform: rotate(-2deg);
+  max-width: 280px;
+  animation: polaroid-in 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes polaroid-in {
+  from { transform: rotate(-2deg) scale(0.7) translateY(30px); opacity: 0; }
+  to { transform: rotate(-2deg) scale(1) translateY(0); opacity: 1; }
+}
+
+.photo-image {
+  width: 256px;
+  height: 200px;
+  background: #0a1628;
+  border-radius: 1px;
+  overflow: hidden;
+  position: relative;
+}
+
+.aurora-scene {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  background: linear-gradient(180deg, #0a1628 0%, #162040 40%, #1a1a2e 100%);
+}
+
+.aurora {
+  position: absolute;
+  top: 10%;
+  left: 10%;
+  width: 80%;
+  height: 50%;
+  background:
+    radial-gradient(ellipse at 30% 50%, rgba(80, 200, 120, 0.4) 0%, transparent 60%),
+    radial-gradient(ellipse at 70% 40%, rgba(100, 180, 255, 0.3) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 60%, rgba(160, 100, 220, 0.25) 0%, transparent 55%);
+  animation: aurora-wave 6s ease-in-out infinite;
+  filter: blur(8px);
+}
+
+@keyframes aurora-wave {
+  0%, 100% { transform: scaleX(1) translateY(0); }
+  33% { transform: scaleX(1.1) translateY(-5px); }
+  66% { transform: scaleX(0.95) translateY(3px); }
+}
+
+.mountains {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 35%;
+  background:
+    linear-gradient(135deg, transparent 33%, #0a0a14 33%, #0a0a14 40%, transparent 40%),
+    linear-gradient(160deg, transparent 45%, #0e0e1a 45%, #0e0e1a 55%, transparent 55%),
+    linear-gradient(145deg, transparent 55%, #0a0a14 55%);
+}
+
+.stars {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: white;
+  border-radius: 50%;
+  animation: twinkle 3s ease-in-out infinite;
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+.photo-caption {
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  color: #666;
+  text-align: center;
+  margin-top: 8px;
+  line-height: 1.4;
+}
+
+/* === Status Badge (our side, z-index 30) === */
+.status-badge {
+  position: absolute;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  background: rgba(10, 12, 18, 0.65);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #555;
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+
+.status-badge.idle .status-dot {
+  background: #6a8a6a;
+  box-shadow: 0 0 6px rgba(106, 138, 106, 0.4);
+}
+
+.status-badge.listening .status-dot {
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent-glow);
+  animation: dot-pulse 1.2s ease-in-out infinite;
+}
+
+.status-badge.thinking .status-dot {
+  background: #7a8aaa;
+  animation: dot-pulse 1.5s ease-in-out infinite;
+}
+
+.status-badge.speaking .status-dot {
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent-glow);
+}
+
+@keyframes dot-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.7); }
+}
+
+/* === Subtitle Area (z-index 30) === */
+/* Anchored at 63% from top */
+.subtitle-area {
+  position: absolute;
+  top: 63%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 30;
+  width: 90%;
+  max-width: 480px;
+  pointer-events: none;
+}
+
+.subtitle-box {
+  background: rgba(8, 10, 16, 0.72);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  padding: 12px 18px;
+  text-align: center;
+}
+
+.subtitle-name {
+  display: block;
+  font-size: 11px;
+  color: var(--accent);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+
+.subtitle-text {
+  font-size: 15px;
+  color: var(--text-primary);
+  line-height: 1.55;
+  min-height: 20px;
+}
+
+/* Typing cursor */
+.subtitle-box.typing .subtitle-text::after {
+  content: '\2502';
+  animation: cursor-blink 0.8s ease-in-out infinite;
+  color: var(--accent);
+  margin-left: 1px;
+}
+
+@keyframes cursor-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* === Input Area (our side, z-index 30) === */
+.input-area {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 30;
+  padding: 16px 20px calc(env(safe-area-inset-bottom, 8px) + 16px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.input-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  max-width: 480px;
+  background: var(--input-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--input-border);
+  border-radius: 24px;
+  padding: 4px 6px 4px 18px;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.input-container:focus-within {
+  border-color: rgba(201, 168, 76, 0.3);
+  box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.08);
+}
+
+.text-input {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  color: var(--text-primary);
+  font-size: 15px;
+  font-family: inherit;
+  padding: 10px 0;
+  min-width: 0;
+}
+
+.text-input::placeholder {
+  color: var(--text-secondary);
+}
+
+.send-btn,
+.mic-btn {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.send-btn {
+  background: var(--accent);
+  color: #1a1a2e;
+}
+
+.send-btn:hover:not(:disabled) {
+  background: var(--raincoat-highlight);
+  transform: scale(1.05);
+}
+
+.send-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.mic-btn {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-secondary);
+}
+
+.mic-btn:hover {
+  background: rgba(255, 255, 255, 0.14);
+  color: var(--text-primary);
+}
+
+.mic-btn.recording {
+  background: rgba(220, 80, 60, 0.2);
+  color: #e85040;
+}
+
+.mic-btn.pulse {
+  animation: mic-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes mic-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(220, 80, 60, 0.3); }
+  50% { box-shadow: 0 0 0 8px rgba(220, 80, 60, 0); }
+}
+
+/* Interrupt hint */
+.interrupt-hint {
+  font-size: 11px;
+  color: var(--text-secondary);
+  letter-spacing: 0.3px;
+  animation: fade-in 0.3s ease;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Mode badge */
+.mode-badge {
+  position: absolute;
+  bottom: calc(env(safe-area-inset-bottom, 8px) + 70px);
+  right: 20px;
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.25);
+  letter-spacing: 1.5px;
+  font-weight: 600;
+}
+
+/* === Responsive === */
+@media (max-width: 480px) {
+  .shop-interior {
+    width: 340px;
+  }
+
+  .character-area {
+    width: 260px;
+  }
+
+  /* Scale down character slightly for narrow screens */
+  .character-head {
+    width: 66px;
+    height: 74px;
+  }
+
+  .face {
+    width: 52px;
+    height: 60px;
+  }
+
+  .hair {
+    width: 68px;
+    height: 42px;
+  }
+
+  .hair::before,
+  .hair::after {
+    bottom: -12px;
+    width: 10px;
+    height: 20px;
+  }
+
+  .character-torso {
+    width: 78px;
+    height: 105px;
+  }
+
+  .hand {
+    width: 15px;
+    height: 15px;
+  }
+
+  .cafe-table {
+    width: 200px;
+  }
+
+  .subtitle-text {
+    font-size: 14px;
+  }
+
+  .input-container {
+    padding: 3px 5px 3px 14px;
+  }
+
+  .text-input {
+    font-size: 14px;
+  }
+
+  .polaroid {
+    max-width: 240px;
+  }
+
+  .photo-image {
+    width: 216px;
+    height: 170px;
+  }
+}
+
+@media (max-width: 360px) {
+  .character-head {
+    width: 58px;
+    height: 66px;
+  }
+
+  .face {
+    width: 46px;
+    height: 54px;
+  }
+
+  .hair {
+    width: 60px;
+    height: 38px;
+  }
+
+  .character-torso {
+    width: 70px;
+    height: 90px;
+  }
+
+  .cafe-table {
+    width: 170px;
+  }
+
+  .status-badge {
+    font-size: 11px;
+    padding: 5px 12px;
+  }
+}
+
+/* === Dark scrollbar === */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 2px; }
