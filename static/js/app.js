@@ -20,6 +20,7 @@ const app = createApp({
     const currentSubtitle = ref('');
     const displayedSubtitle = ref('');
     const isTypingSubtitle = ref(false);
+    const isSubtitleFading = ref(false);
     const showPhoto = ref(false);
     const showParticles = ref(false);
     const isRecording = ref(false);
@@ -33,6 +34,7 @@ const app = createApp({
     let recognition = null;
     let blinkInterval = null;
     let subtitleTimer = null;
+    let subtitleFadeTimer = null;
     let actionTimer = null;
     let particleTimer = null;
     let turnCount = 0;
@@ -82,6 +84,10 @@ const app = createApp({
       userInput.value = '';
       const requestId = generateRequestId();
       currentRequestId = requestId;
+
+      // Cancel any pending fade
+      clearTimeout(subtitleFadeTimer);
+      isSubtitleFading.value = false;
 
       // Add user message to history
       chatHistory.value.push({ role: 'user', content: text });
@@ -137,13 +143,30 @@ const app = createApp({
         // Play TTS audio (blocking — wait for it to finish)
         await playTTS(data.text, requestId);
 
-        // Audio done — show full subtitle immediately
+        // Audio done — show full subtitle, then fade after delay
         if (currentRequestId === requestId) {
           clearInterval(subtitleTimer);
+          clearTimeout(subtitleFadeTimer);
           displayedSubtitle.value = currentSubtitle.value;
           isTypingSubtitle.value = false;
+          isSubtitleFading.value = false;
           characterState.value = 'idle';
           mouthState.value = '';
+
+          // Start fade-out after 4 seconds
+          subtitleFadeTimer = setTimeout(() => {
+            if (currentRequestId === requestId) {
+              isSubtitleFading.value = true;
+              // Clear subtitle after fade animation (1.5s)
+              setTimeout(() => {
+                if (currentRequestId === requestId) {
+                  currentSubtitle.value = '';
+                  displayedSubtitle.value = '';
+                  isSubtitleFading.value = false;
+                }
+              }, 1500);
+            }
+          }, 4000);
         }
 
       } catch (err) {
@@ -388,7 +411,9 @@ const app = createApp({
 
       // Clear subtitle animation
       clearInterval(subtitleTimer);
+      clearTimeout(subtitleFadeTimer);
       isTypingSubtitle.value = false;
+      isSubtitleFading.value = false;
 
       // Generate new request ID to invalidate pending responses
       currentRequestId = generateRequestId();
@@ -504,6 +529,7 @@ const app = createApp({
     onUnmounted(() => {
       clearInterval(blinkInterval);
       clearInterval(subtitleTimer);
+      clearTimeout(subtitleFadeTimer);
       clearTimeout(actionTimer);
       clearTimeout(particleTimer);
       stopCurrentAudio();
@@ -527,6 +553,7 @@ const app = createApp({
       currentSubtitle,
       displayedSubtitle,
       isTypingSubtitle,
+      isSubtitleFading,
       showPhoto,
       showParticles,
       isRecording,

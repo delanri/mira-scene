@@ -10,34 +10,116 @@
   <div id="app">
     <div class="scene" :class="[`bg-${sceneBackground}`, { 'lightning-flash': isLightning }]">
 
-      <!-- Shop Interior warm glow (behind glass) -->
+      <!-- ===== Layer 1: Shop Interior (z:5) ===== -->
       <div class="shop-interior">
+        <!-- Pendant lamp silhouette -->
+        <div class="pendant-lamp">
+          <div class="lamp-cord"></div>
+          <div class="lamp-shade"></div>
+        </div>
         <div class="ambient-light" :class="{ flicker: isFlickering }"></div>
+        <!-- Subtle interior hints -->
+        <div class="interior-detail shelf-l"></div>
+        <div class="interior-detail shelf-r"></div>
+        <div class="interior-detail frame-l"></div>
       </div>
 
-      <!-- Character + Table (inside the shop, behind glass) -->
+      <!-- ===== Layer 2: Character + Table (z:10) ===== -->
       <div class="character-area">
         <div class="character-container" :class="[currentEmotion, currentAction, characterState]">
-          <div class="character-body">
-            <div class="character-head">
-              <div class="hair"></div>
-              <div class="hair-clip">★</div>
-              <div class="face">
-                <div class="eyes">
-                  <div class="eye left" :class="{ closed: isBlinking }"></div>
-                  <div class="eye right" :class="{ closed: isBlinking }"></div>
-                </div>
-                <div class="mouth" :class="[mouthState]"></div>
-              </div>
-            </div>
-            <div class="character-torso">
-              <div class="raincoat"></div>
-              <div class="hand left-hand"></div>
-              <div class="hand right-hand"></div>
-            </div>
-          </div>
 
-          <!-- Cafe table with coffee cup -->
+          <!-- Mira — Inline SVG Character -->
+          <svg class="mira-svg" viewBox="0 0 200 300" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="rc-grad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#e0c060"/>
+                <stop offset="35%" stop-color="#c9a84c"/>
+                <stop offset="100%" stop-color="#a8893a"/>
+              </linearGradient>
+              <linearGradient id="collar-grad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#b89840"/>
+                <stop offset="100%" stop-color="#9a7e35"/>
+              </linearGradient>
+              <radialGradient id="skin-g" cx="0.45" cy="0.38">
+                <stop offset="0%" stop-color="#f5dcc5"/>
+                <stop offset="70%" stop-color="#f0d5b8"/>
+                <stop offset="100%" stop-color="#e4c4a0"/>
+              </radialGradient>
+              <radialGradient id="hair-g" cx="78" cy="55" r="110" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#252542"/>
+                <stop offset="100%" stop-color="#1a1a2e"/>
+              </radialGradient>
+              <filter id="clip-glow" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="g"/>
+                <feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+            </defs>
+
+            <!-- Hair back — 妹妹头 (bob cut) -->
+            <ellipse cx="100" cy="85" rx="62" ry="58" fill="url(#hair-g)"/>
+
+            <!-- Left side hair (bob到下巴，发尾内扣) -->
+            <path d="M44,62 C36,80 34,108 36,132 Q38,148 52,144 Q60,140 57,128 C56,112 55,90 57,75Z" fill="url(#hair-g)"/>
+
+            <!-- Right side hair (bob到下巴，发尾内扣) -->
+            <path d="M156,62 C164,80 166,108 164,132 Q162,148 148,144 Q140,140 143,128 C144,112 145,90 143,75Z" fill="url(#hair-g)"/>
+
+            <!-- Neck -->
+            <rect x="90" y="138" width="20" height="20" rx="5" fill="#e8c8a8"/>
+
+            <!-- Face -->
+            <ellipse cx="100" cy="100" rx="44" ry="50" fill="url(#skin-g)"/>
+
+            <!-- Cheek blush -->
+            <ellipse cx="72" cy="116" rx="10" ry="6" fill="#e8a090" opacity="0.25"/>
+            <ellipse cx="128" cy="116" rx="10" ry="6" fill="#e8a090" opacity="0.25"/>
+
+            <!-- Side hair front wisps (脸前侧发丝) -->
+            <path d="M54,88 C50,104 48,122 50,138" stroke="#1a1a2e" stroke-width="7" fill="none" stroke-linecap="round" opacity="0.45"/>
+            <path d="M146,88 C150,104 152,122 150,138" stroke="#1a1a2e" stroke-width="7" fill="none" stroke-linecap="round" opacity="0.45"/>
+
+            <!-- Bangs — 齐刘海 -->
+            <path d="M42,72 C42,26 158,26 158,72 L156,94 Q130,89 100,91 Q70,89 44,94Z" fill="url(#hair-g)"/>
+
+            <!-- Bangs bottom strand detail -->
+            <path d="M50,92 Q75,86 100,89 Q125,86 150,92" stroke="#22223a" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.25"/>
+
+            <!-- Hair highlight shimmer -->
+            <path d="M58,46 Q100,32 142,46" stroke="rgba(80,80,120,0.18)" stroke-width="6" fill="none" stroke-linecap="round"/>
+
+            <!-- Eyes (group for blink) -->
+            <g :class="{ blink: isBlinking }">
+              <ellipse class="eye-shape eye-l" cx="82" cy="105" rx="5.5" ry="6.5" fill="#1a1a2e"/>
+              <circle class="eye-hl" cx="84" cy="103" r="2.2" fill="white" opacity="0.85"/>
+              <ellipse class="eye-shape eye-r" cx="118" cy="105" rx="5.5" ry="6.5" fill="#1a1a2e"/>
+              <circle class="eye-hl" cx="120" cy="103" r="2.2" fill="white" opacity="0.85"/>
+            </g>
+
+            <!-- Mouth variants (switched by mouthState) -->
+            <path v-show="mouthState === ''" d="M93,128 Q100,134 107,128" fill="#c48a70"/>
+            <path v-show="mouthState === 'smile'" d="M88,126 Q100,138 112,126" fill="#c48a70"/>
+            <line v-show="mouthState === 'slight'" x1="93" y1="130" x2="107" y2="130" stroke="#c48a70" stroke-width="2" stroke-linecap="round"/>
+            <ellipse v-show="mouthState === 'open'" cx="100" cy="130" rx="6" ry="7" fill="#c48a70"/>
+            <ellipse v-show="mouthState === 'speaking-mouth'" class="mouth-anim" cx="100" cy="130" rx="5.5" ry="5" fill="#c48a70"/>
+
+            <!-- Hair clip (star with glow) -->
+            <g class="clip-g" filter="url(#clip-glow)">
+              <text x="146" y="88" font-size="13" fill="#e8c84c" font-family="sans-serif">✦</text>
+            </g>
+
+            <!-- Body (raincoat — smooth trapezoid) -->
+            <path d="M70,155 C74,148 126,148 130,155 L140,285 Q100,292 60,285Z" fill="url(#rc-grad)"/>
+
+            <!-- Collar detail -->
+            <path d="M84,155 Q100,163 116,155" fill="none" stroke="#9a7e35" stroke-width="3" stroke-linecap="round"/>
+            <rect x="92" y="151" width="16" height="9" rx="2" fill="url(#collar-grad)"/>
+
+            <!-- Hands -->
+            <circle class="hand-l" cx="56" cy="275" r="12" fill="url(#skin-g)"/>
+            <circle class="hand-r" cx="144" cy="275" r="12" fill="url(#skin-g)"/>
+          </svg>
+
+          <!-- Cafe table -->
           <div class="cafe-table">
             <div class="coffee-cup">
               <div class="steam"></div>
@@ -53,7 +135,7 @@
           </div>
         </div>
 
-        <!-- Photo overlay -->
+        <!-- Photo overlay (polaroid) -->
         <div class="photo-overlay" v-if="showPhoto" @click="showPhoto = false">
           <div class="polaroid">
             <div class="photo-image">
@@ -70,90 +152,71 @@
         </div>
       </div>
 
-      <!-- Glass Window Layer (the pane between us and the shop) -->
-      <div class="glass-layer">
+      <!-- ===== Layer 3: Glass Window (z:15) ===== -->
+      <div class="glass-layer" v-once>
         <div class="glass-drop" v-for="n in 40" :key="'drop-'+n"
              :style="{
-               left: `${5 + Math.random()*90}%`,
-               top: `${5 + Math.random()*85}%`,
-               '--drop-size': `${2 + Math.random()*5}px`,
+               left: `${3 + Math.random()*94}%`,
+               '--drop-size': `${3 + Math.random()*5}px`,
                '--drip-length': `${10 + Math.random()*25}px`,
-               animationDelay: `${Math.random()*5}s`
+               '--drop-dur': `${14 + Math.random()*22}s`,
+               animationDelay: `${-Math.random()*30}s`
              }"
              :class="{ dripping: n % 5 === 0 }">
         </div>
         <div class="condensation"></div>
       </div>
 
-      <!-- Rain (our side, in front of glass) -->
+      <!-- ===== Window Frame (z:18) ===== -->
+      <div class="window-frame"></div>
+
+      <!-- ===== Layer 4: Rain (z:22) ===== -->
       <div class="rain-container" :class="{ heavy: sceneBackground === 'rain_heavy' }">
         <div class="rain-drop" v-for="n in 60" :key="n"
              :style="{ left: `${Math.random()*100}%`, animationDelay: `${Math.random()*2}s`, animationDuration: `${0.4 + Math.random()*0.4}s` }">
         </div>
       </div>
 
-      <!-- Status Badge (UI, our side) -->
+      <!-- ===== UI Layer (z:30+) ===== -->
       <div class="status-badge" :class="characterState">
         <span class="status-dot"></span>
         <span class="status-text">{{ statusText }}</span>
       </div>
 
-      <!-- Subtitle Area -->
       <div class="subtitle-area" v-if="currentSubtitle">
-        <div class="subtitle-box" :class="{ 'typing': isTypingSubtitle }">
-          <span class="subtitle-name">Mira</span>
+        <div class="subtitle-box" :class="{ 'typing': isTypingSubtitle, 'rain-fade': isSubtitleFading }">
+          <span class="subtitle-name">MIRA</span>
           <p class="subtitle-text">{{ displayedSubtitle }}</p>
         </div>
       </div>
 
-      <!-- Input Area -->
       <div class="input-area">
         <div class="input-container">
-          <input
-            type="text"
-            v-model="userInput"
-            @keydown.enter="sendMessage"
-            :placeholder="inputPlaceholder"
-            :disabled="characterState === 'thinking'"
-            ref="textInput"
-            class="text-input"
-          >
-          <button
-            class="send-btn"
-            @click="sendMessage"
-            :disabled="!userInput.trim() || characterState === 'thinking'"
-            v-if="userInput.trim()"
-          >
+          <input type="text" v-model="userInput" @keydown.enter="sendMessage"
+                 :placeholder="inputPlaceholder" :disabled="characterState === 'thinking'"
+                 ref="textInput" class="text-input">
+          <button class="send-btn" @click="sendMessage"
+                  :disabled="!userInput.trim() || characterState === 'thinking'"
+                  v-if="userInput.trim()">
             <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
               <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
             </svg>
           </button>
-          <button
-            class="mic-btn"
-            :class="{ recording: isRecording, pulse: isRecording }"
-            @mousedown="startRecording"
-            @mouseup="stopRecording"
-            @touchstart.prevent="startRecording"
-            @touchend.prevent="stopRecording"
-            v-if="!userInput.trim()"
-            :title="isRecording ? 'Release to send' : 'Hold to speak'"
-          >
+          <button class="mic-btn" :class="{ recording: isRecording, pulse: isRecording }"
+                  @mousedown="startRecording" @mouseup="stopRecording"
+                  @touchstart.prevent="startRecording" @touchend.prevent="stopRecording"
+                  v-if="!userInput.trim()" :title="isRecording ? 'Release to send' : 'Hold to speak'">
             <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
               <path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/>
             </svg>
           </button>
         </div>
-        <!-- Interrupt hint -->
-        <div class="interrupt-hint" v-if="characterState === 'speaking'">
-          Tap mic or type to interrupt
-        </div>
-        <!-- Mode badge -->
+        <div class="interrupt-hint" v-if="characterState === 'speaking'">Tap mic or type to interrupt</div>
         <div class="mode-badge">{{ apiMode === 'mock' ? 'DEMO' : 'LIVE' }}</div>
       </div>
     </div>
   </div>
 
-  <!-- Vue 3 CDN -->
   <script src="https://unpkg.com/vue@3.4.38/dist/vue.global.prod.js"></script>
   <script src="/js/app.js"></script>
 </body>

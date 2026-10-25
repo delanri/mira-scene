@@ -8,12 +8,12 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 :root {
-  /* Night outside */
-  --night-dark: #0a0c12;
-  --night-mid: #141822;
-  /* Warm interior light leaking through glass */
-  --glow-warm: rgba(205, 150, 60, 0.30);
-  --glow-center: rgba(235, 190, 95, 0.22);
+  /* Night outside — blue rain tone */
+  --night-dark: #0b1222;
+  --night-mid: #142038;
+  /* Warm interior light leaking through glass — boosted */
+  --glow-warm: rgba(205, 150, 60, 0.40);
+  --glow-center: rgba(235, 190, 95, 0.32);
   /* Glass */
   --glass-tint: rgba(160, 185, 210, 0.06);
   --glass-edge-fog: rgba(180, 200, 220, 0.25);
@@ -21,7 +21,7 @@
   --rain-color: rgba(174, 200, 235, 0.55);
   /* Interior warm palette */
   --interior-bg: #2a1f14;
-  --interior-glow: rgba(215, 165, 70, 0.50);
+  --interior-glow: rgba(215, 165, 70, 0.55);
   --table-color: #3d2b18;
   --table-highlight: #5a3f25;
   /* Character */
@@ -65,11 +65,39 @@ html, body {
   position: fixed;
   inset: 0;
   background:
-    radial-gradient(ellipse 65% 55% at 50% 42%,
+    /* warm glow leaking from window */
+    radial-gradient(ellipse 60% 45% at 50% 38%,
       var(--glow-center) 0%,
-      var(--glow-warm) 30%,
-      transparent 70%),
-    linear-gradient(175deg, #0d1018 0%, var(--night-dark) 40%, #0e1119 100%);
+      var(--glow-warm) 25%,
+      rgba(180, 130, 50, 0.12) 45%,
+      transparent 65%),
+    /* wet pavement reflection at bottom */
+    radial-gradient(ellipse 90% 25% at 50% 98%,
+      rgba(60, 85, 130, 0.18) 0%,
+      rgba(40, 60, 100, 0.08) 50%,
+      transparent 100%),
+    /* subtle wall texture — faint horizontal lines */
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 28px,
+      rgba(140, 160, 190, 0.018) 28px,
+      rgba(140, 160, 190, 0.018) 29px
+    ),
+    /* subtle vertical variation */
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 45px,
+      rgba(120, 140, 170, 0.012) 45px,
+      rgba(120, 140, 170, 0.012) 46px
+    ),
+    /* sky glow at top */
+    radial-gradient(ellipse 70% 20% at 50% 0%,
+      rgba(50, 70, 110, 0.15) 0%,
+      transparent 100%),
+    /* base night gradient */
+    linear-gradient(175deg, #0e1530 0%, var(--night-dark) 30%, #0c1428 55%, #0f1832 80%, #0a1020 100%);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -87,8 +115,8 @@ html, body {
   background:
     radial-gradient(ellipse 75% 70% at 50% 45%,
       transparent 40%,
-      rgba(5, 7, 12, 0.4) 70%,
-      rgba(5, 7, 12, 0.85) 100%);
+      rgba(10, 18, 38, 0.35) 65%,
+      rgba(6, 12, 28, 0.75) 100%);
 }
 
 /* Lightning flash */
@@ -110,7 +138,6 @@ html, body {
 }
 
 /* === Shop Interior (behind glass, z-index 5) === */
-/* Repositioned to cover character zone with warm glow */
 .shop-interior {
   position: absolute;
   top: 12%;
@@ -121,13 +148,73 @@ html, body {
   z-index: 5;
   background:
     radial-gradient(ellipse 80% 70% at 50% 40%,
-      rgba(210, 160, 75, 0.14) 0%,
-      rgba(180, 135, 60, 0.08) 50%,
+      rgba(210, 160, 75, 0.18) 0%,
+      rgba(180, 135, 60, 0.10) 50%,
       transparent 100%);
   border-radius: 4px 4px 0 0;
   pointer-events: none;
 }
 
+/* --- Pendant lamp silhouette --- */
+.pendant-lamp {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1;
+}
+
+.lamp-cord {
+  width: 1px;
+  height: 24px;
+  background: rgba(60, 50, 35, 0.5);
+  margin: 0 auto;
+}
+
+.lamp-shade {
+  width: 44px;
+  height: 18px;
+  background: linear-gradient(180deg, rgba(90, 70, 40, 0.45) 0%, rgba(70, 55, 30, 0.3) 100%);
+  border-radius: 0 0 50% 50% / 0 0 100% 100%;
+  margin: 0 auto;
+  box-shadow: 0 8px 28px rgba(215, 170, 70, 0.25), 0 3px 12px rgba(235, 195, 105, 0.15);
+}
+
+/* --- Interior detail silhouettes --- */
+.interior-detail {
+  position: absolute;
+  pointer-events: none;
+}
+
+.shelf-l {
+  left: 8%;
+  top: 18%;
+  width: 35px;
+  height: 3px;
+  background: rgba(50, 38, 22, 0.3);
+  border-radius: 1px;
+  box-shadow: 0 10px 0 rgba(50, 38, 22, 0.2);
+}
+
+.shelf-r {
+  right: 8%;
+  top: 24%;
+  width: 30px;
+  height: 3px;
+  background: rgba(50, 38, 22, 0.25);
+  border-radius: 1px;
+}
+
+.frame-l {
+  left: 12%;
+  top: 32%;
+  width: 18px;
+  height: 22px;
+  border: 1px solid rgba(80, 65, 40, 0.2);
+  border-radius: 1px;
+}
+
+/* --- Ambient light (BOOSTED: center 0.20 → 0.30) --- */
 .ambient-light {
   position: absolute;
   top: 5%;
@@ -137,9 +224,9 @@ html, body {
   height: 260px;
   border-radius: 50%;
   background: radial-gradient(circle,
-    rgba(235, 195, 105, 0.20) 0%,
-    rgba(215, 175, 90, 0.12) 35%,
-    rgba(200, 160, 80, 0.05) 55%,
+    rgba(235, 195, 105, 0.36) 0%,
+    rgba(215, 175, 90, 0.22) 35%,
+    rgba(200, 160, 80, 0.10) 55%,
     transparent 70%);
   animation: ambient-pulse 8s ease-in-out infinite;
 }
@@ -167,7 +254,6 @@ html, body {
 }
 
 /* === Character Area (inside shop, z-index 10) === */
-/* Top-anchored: 20% to 58% of viewport */
 .character-area {
   position: absolute;
   top: 20%;
@@ -191,233 +277,75 @@ html, body {
   transition: transform 0.4s ease;
 }
 
-.character-body {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+/* === SVG Character (Mira) === */
+.mira-svg {
+  width: 220px;
+  display: block;
 }
 
-/* --- Head (scaled up for C-size) --- */
-.character-head {
-  position: relative;
-  width: 76px;
-  height: 84px;
-  z-index: 2;
+/* --- Eye blink via SVG attribute transition --- */
+.blink .eye-shape {
+  ry: 1.5;
+  transition: ry 0.12s ease;
 }
 
-.face {
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 60px;
-  height: 68px;
-  background: var(--skin);
-  border-radius: 50% 50% 48% 48%;
-  z-index: 1;
-  box-shadow: inset -3px -2px 6px var(--skin-shadow);
+.blink .eye-hl {
+  opacity: 0;
+  transition: opacity 0.1s ease;
 }
 
-.hair {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 78px;
-  height: 48px;
-  background: var(--hair-dark);
-  border-radius: 50% 50% 30% 30%;
-  z-index: 2;
-  box-shadow:
-    inset 3px 2px 4px var(--hair-highlight),
-    0 -2px 8px rgba(0, 0, 0, 0.3);
+.eye-shape {
+  transition: ry 0.12s ease, rx 0.2s ease;
 }
 
-/* Side bangs */
-.hair::before,
-.hair::after {
-  content: '';
-  position: absolute;
-  bottom: -14px;
-  width: 12px;
-  height: 24px;
-  background: var(--hair-dark);
-  border-radius: 0 0 50% 50%;
+.eye-hl {
+  transition: opacity 0.1s ease;
 }
 
-.hair::before { left: 2px; }
-.hair::after { right: 2px; }
-
-.hair-clip {
-  position: absolute;
-  top: 22px;
-  right: 2px;
-  font-size: 12px;
-  color: var(--clip-color);
-  z-index: 3;
-  filter: drop-shadow(0 0 3px rgba(232, 200, 76, 0.5));
-  transition: transform 0.3s ease;
+/* --- Mouth animation (speaking) --- */
+.mouth-anim {
+  animation: svg-mouth 0.3s ease-in-out infinite alternate;
 }
 
-/* --- Eyes (scaled) --- */
-.eyes {
-  position: absolute;
-  top: 28px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 13px;
-  z-index: 2;
+@keyframes svg-mouth {
+  0% { ry: 4; rx: 5; }
+  100% { ry: 7; rx: 6; }
 }
 
-.eye {
-  width: 7px;
-  height: 8px;
-  background: var(--eye-color);
-  border-radius: 50%;
-  transition: all 0.15s ease;
-  position: relative;
+/* --- Hair clip glow --- */
+.clip-g {
+  transition: transform 0.3s ease, opacity 0.3s ease;
 }
 
-.eye::after {
-  content: '';
-  position: absolute;
-  top: 1px;
-  left: 2px;
-  width: 2.5px;
-  height: 2.5px;
-  background: white;
-  border-radius: 50%;
-  opacity: 0.8;
+/* --- Hand transitions for actions --- */
+.hand-l, .hand-r {
+  transition: transform 0.5s ease;
 }
 
-.eye.closed {
-  height: 2px;
-  border-radius: 2px;
-}
-.eye.closed::after { opacity: 0; }
-
-/* --- Mouth (scaled) --- */
-.mouth {
-  position: absolute;
-  bottom: 16px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 9px;
-  height: 4px;
-  background: var(--mouth-color);
-  border-radius: 0 0 50% 50%;
-  z-index: 2;
-  transition: all 0.2s ease;
+/* Action: touch hair clip — left hand moves up to head */
+.character-container.touch_hair_clip .hand-l {
+  transform: translate(30px, -130px);
 }
 
-.mouth.speaking-mouth {
-  animation: mouth-move 0.3s ease-in-out infinite alternate;
-}
-
-.mouth.smile {
-  width: 11px;
-  height: 5px;
-  border-radius: 0 0 50% 50%;
-  background: var(--mouth-color);
-}
-
-.mouth.slight {
-  width: 8px;
-  height: 2px;
-  border-radius: 2px;
-  opacity: 0.7;
-}
-
-.mouth.open {
-  width: 8px;
-  height: 7px;
-  border-radius: 50%;
-}
-
-@keyframes mouth-move {
-  0% { height: 3px; width: 8px; }
-  100% { height: 6px; width: 9px; border-radius: 40%; }
-}
-
-/* --- Torso (bigger, sits right above table) --- */
-.character-torso {
-  position: relative;
-  width: 88px;
-  height: 120px;
-  margin-top: -4px;
-  z-index: 1;
-}
-
-.raincoat {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(175deg, var(--raincoat-highlight) 0%, var(--raincoat-main) 40%, var(--raincoat-shadow) 100%);
-  clip-path: polygon(15% 0%, 85% 0%, 95% 100%, 5% 100%);
-  border-radius: 0 0 4px 4px;
-}
-
-/* Collar */
-.raincoat::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 34px;
-  height: 12px;
-  background: var(--raincoat-shadow);
-  border-radius: 0 0 8px 8px;
-}
-
-/* --- Hands (circles resting on table edge) --- */
-.hand {
-  position: absolute;
-  bottom: -5px;
-  width: 17px;
-  height: 17px;
-  background: var(--skin);
-  border-radius: 50%;
-  z-index: 3;
-  box-shadow: inset -1px -1px 3px var(--skin-shadow);
-  transition: transform 0.5s ease, bottom 0.5s ease;
-}
-
-.left-hand {
-  left: 5px;
-}
-
-.right-hand {
-  right: 5px;
-}
-
-/* Action: touch hair clip — left hand moves up */
-.character-container.touch_hair_clip .left-hand {
-  transform: translateY(-100px) translateX(10px);
-}
-
-/* Action: sip coffee — right hand moves to cup */
-.character-container.sip_coffee .right-hand {
-  transform: translateY(8px) translateX(-8px);
+/* Action: sip coffee — right hand moves down-right to cup */
+.character-container.sip_coffee .hand-r {
+  transform: translate(-15px, 8px);
 }
 
 /* === Cafe Table === */
-/* Sits directly below character body — no gap */
 .cafe-table {
   position: relative;
   width: 240px;
   height: 7px;
   background: linear-gradient(180deg, var(--table-highlight) 0%, var(--table-color) 100%);
   border-radius: 2px;
-  margin-top: -2px;
+  margin-top: -18px;
   z-index: 2;
   box-shadow:
     0 2px 8px rgba(0, 0, 0, 0.4),
     inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
-/* Table edge highlight */
 .cafe-table::before {
   content: '';
   position: absolute;
@@ -444,7 +372,6 @@ html, body {
   transition: transform 0.4s ease;
 }
 
-/* Cup rim */
 .coffee-cup::before {
   content: '';
   position: absolute;
@@ -457,7 +384,6 @@ html, body {
   box-shadow: inset 0 2px 2px var(--cup-shadow);
 }
 
-/* Cup handle */
 .coffee-cup::after {
   content: '';
   position: absolute;
@@ -470,7 +396,6 @@ html, body {
   border-radius: 0 4px 4px 0;
 }
 
-/* Coffee liquid visible at top */
 .steam {
   position: absolute;
   top: 0;
@@ -482,7 +407,6 @@ html, body {
   z-index: 1;
 }
 
-/* Steam wisps above cup */
 .steam::before,
 .steam::after {
   content: '';
@@ -513,7 +437,6 @@ html, body {
   100% { opacity: 0; transform: translateY(-24px) scaleX(0.5); }
 }
 
-/* Sip coffee — cup lifts slightly */
 .character-container.sip_coffee .coffee-cup {
   transform: translateY(-4px) rotate(-5deg);
 }
@@ -574,72 +497,77 @@ html, body {
   50% { transform: translateY(-2px); }
 }
 
-/* === Emotion States === */
+/* === Emotion States (targeting SVG elements) === */
 .character-container.happy {
   transform: rotate(-1deg);
 }
-.character-container.happy .hair-clip {
+.character-container.happy .clip-g {
   transform: rotate(10deg) scale(1.1);
-  filter: drop-shadow(0 0 6px rgba(232, 200, 76, 0.7));
+  transform-origin: 152px 68px;
 }
 
 .character-container.melancholy {
   transform: translateY(2px);
 }
-.character-container.melancholy .eye {
-  height: 5px;
+.character-container.melancholy .eye-shape {
+  ry: 4.5;
   opacity: 0.7;
 }
 
-.character-container.surprised .eye {
-  width: 9px;
-  height: 10px;
+.character-container.surprised .eye-shape {
+  rx: 7;
+  ry: 8.5;
 }
 
 .character-container.curious {
   transform: rotate(3deg);
 }
-.character-container.curious .eye.right {
-  width: 8px;
-  height: 9px;
+.character-container.curious .eye-r {
+  rx: 6.5;
+  ry: 7.5;
 }
 
-/* === Glass Layer (z-index 15) === */
+/* === Glass Layer (z-index 15) — clipped to window frame area === */
 .glass-layer {
   position: absolute;
-  inset: 0;
+  top: 12%;
+  left: 5%;
+  right: 5%;
+  bottom: 36%;
   z-index: 15;
   pointer-events: none;
   background: var(--glass-tint);
+  overflow: hidden;
 }
 
-/* Condensation — foggy at edges, clearer in center */
+/* Condensation — REBALANCED: wider clear center, warmer tint, lower outer opacity */
 .condensation {
   position: absolute;
   inset: 0;
   background:
     radial-gradient(ellipse 55% 50% at 50% 45%,
-      transparent 30%,
-      rgba(180, 200, 220, 0.08) 55%,
-      rgba(160, 185, 210, 0.18) 75%,
-      rgba(140, 170, 200, 0.28) 100%);
+      transparent 40%,
+      rgba(190, 200, 210, 0.06) 55%,
+      rgba(175, 190, 200, 0.12) 75%,
+      rgba(160, 175, 185, 0.16) 100%);
 }
 
-/* Extra fog at corners */
+/* Corner fog — REDUCED from 0.16-0.22 to 0.10-0.14 */
 .condensation::before {
   content: '';
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at 5% 8%, rgba(180, 200, 220, 0.2) 0%, transparent 25%),
-    radial-gradient(circle at 92% 12%, rgba(180, 200, 220, 0.18) 0%, transparent 20%),
-    radial-gradient(circle at 8% 88%, rgba(180, 200, 220, 0.22) 0%, transparent 22%),
-    radial-gradient(circle at 95% 85%, rgba(180, 200, 220, 0.16) 0%, transparent 18%);
+    radial-gradient(circle at 5% 8%, rgba(180, 195, 210, 0.14) 0%, transparent 25%),
+    radial-gradient(circle at 92% 12%, rgba(180, 195, 210, 0.12) 0%, transparent 20%),
+    radial-gradient(circle at 8% 88%, rgba(180, 195, 210, 0.14) 0%, transparent 22%),
+    radial-gradient(circle at 95% 85%, rgba(180, 195, 210, 0.10) 0%, transparent 18%);
 }
 
-/* Water drops on glass */
+/* Water drops on glass — fall from top to bottom, no flicker */
 .glass-drop {
   position: absolute;
+  top: -3%;
   width: var(--drop-size, 4px);
   height: var(--drop-size, 4px);
   background: radial-gradient(circle at 35% 35%,
@@ -648,13 +576,11 @@ html, body {
     rgba(180, 200, 220, 0.08) 100%);
   border-radius: 50%;
   border: 0.5px solid rgba(255, 255, 255, 0.08);
-  animation: drop-shimmer 4s ease-in-out infinite;
+  animation: drop-fall var(--drop-dur, 22s) linear infinite;
 }
 
-/* Dripping drops — elongated with tail */
 .glass-drop.dripping {
   border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
-  animation: drop-drip 6s ease-in-out infinite;
 }
 
 .glass-drop.dripping::after {
@@ -670,24 +596,47 @@ html, body {
     transparent 100%);
 }
 
-@keyframes drop-shimmer {
-  0%, 100% { opacity: 0.7; }
-  50% { opacity: 1; }
+/* Top → bottom, fade in at top, fade out at bottom */
+@keyframes drop-fall {
+  0% { transform: translateY(0); opacity: 0; }
+  3% { opacity: 0.6; }
+  85% { opacity: 0.4; }
+  100% { transform: translateY(550px); opacity: 0; }
 }
 
-@keyframes drop-drip {
-  0%, 100% {
-    transform: translateY(0);
-    opacity: 0.8;
-  }
-  40% {
-    transform: translateY(0);
-    opacity: 1;
-  }
-  80% {
-    transform: translateY(8px);
-    opacity: 0.5;
-  }
+/* === Window Frame (z-index 18) === */
+.window-frame {
+  position: absolute;
+  top: 12%;
+  left: 5%;
+  right: 5%;
+  bottom: 36%;
+  z-index: 18;
+  pointer-events: none;
+  border: 10px solid #3a2818;
+  border-radius: 3px;
+  box-shadow:
+    inset 0 0 0 1px rgba(90, 70, 35, 0.35),
+    inset 0 0 12px rgba(0, 0, 0, 0.3),
+    0 0 20px rgba(0, 0, 0, 0.4),
+    0 0 40px rgba(0, 0, 0, 0.25);
+}
+
+/* Wood grain hint */
+.window-frame::before {
+  content: '';
+  position: absolute;
+  inset: -10px;
+  border: 10px solid transparent;
+  border-radius: 3px;
+  border-image: repeating-linear-gradient(
+    95deg,
+    rgba(70, 50, 25, 0.15) 0px,
+    transparent 2px,
+    transparent 6px,
+    rgba(70, 50, 25, 0.1) 8px
+  ) 10;
+  pointer-events: none;
 }
 
 /* === Rain (our side, z-index 22) === */
@@ -712,7 +661,6 @@ html, body {
   border-radius: 0 0 2px 2px;
 }
 
-/* Heavy rain */
 .rain-container.heavy .rain-drop {
   height: 28px;
   width: 2px;
@@ -900,7 +848,6 @@ html, body {
 }
 
 /* === Subtitle Area (z-index 30) === */
-/* Anchored at 63% from top */
 .subtitle-area {
   position: absolute;
   top: 63%;
@@ -939,7 +886,6 @@ html, body {
   min-height: 20px;
 }
 
-/* Typing cursor */
 .subtitle-box.typing .subtitle-text::after {
   content: '\2502';
   animation: cursor-blink 0.8s ease-in-out infinite;
@@ -950,6 +896,42 @@ html, body {
 @keyframes cursor-blink {
   0%, 100% { opacity: 1; }
   50% { opacity: 0; }
+}
+
+/* --- Subtitle rain-wash fade out --- */
+.subtitle-box.rain-fade {
+  animation: rain-wash-out 1.5s ease-in forwards;
+}
+
+@keyframes rain-wash-out {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+    mask-image: linear-gradient(to bottom, black 100%, black 100%);
+    -webkit-mask-image: linear-gradient(to bottom, black 100%, black 100%);
+  }
+  30% {
+    opacity: 0.7;
+    transform: translateY(3px);
+    filter: blur(0.3px);
+    mask-image: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, black 30%, black 100%);
+    -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, black 30%, black 100%);
+  }
+  60% {
+    opacity: 0.35;
+    transform: translateY(8px);
+    filter: blur(0.8px);
+    mask-image: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.2) 30%, rgba(0,0,0,0.6) 70%, black 100%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.2) 30%, rgba(0,0,0,0.6) 70%, black 100%);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(16px);
+    filter: blur(1.5px);
+    mask-image: linear-gradient(to bottom, transparent 0%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, transparent 100%);
+  }
 }
 
 /* === Input Area (our side, z-index 30) === */
@@ -1055,7 +1037,6 @@ html, body {
   50% { box-shadow: 0 0 0 8px rgba(220, 80, 60, 0); }
 }
 
-/* Interrupt hint */
 .interrupt-hint {
   font-size: 11px;
   color: var(--text-secondary);
@@ -1068,7 +1049,6 @@ html, body {
   to { opacity: 1; }
 }
 
-/* Mode badge */
 .mode-badge {
   position: absolute;
   bottom: calc(env(safe-area-inset-bottom, 8px) + 70px);
@@ -1089,41 +1069,12 @@ html, body {
     width: 260px;
   }
 
-  /* Scale down character slightly for narrow screens */
-  .character-head {
-    width: 66px;
-    height: 74px;
-  }
-
-  .face {
-    width: 52px;
-    height: 60px;
-  }
-
-  .hair {
-    width: 68px;
-    height: 42px;
-  }
-
-  .hair::before,
-  .hair::after {
-    bottom: -12px;
-    width: 10px;
-    height: 20px;
-  }
-
-  .character-torso {
-    width: 78px;
-    height: 105px;
-  }
-
-  .hand {
-    width: 15px;
-    height: 15px;
+  .mira-svg {
+    width: 180px;
   }
 
   .cafe-table {
-    width: 200px;
+    width: 210px;
   }
 
   .subtitle-text {
@@ -1146,36 +1097,30 @@ html, body {
     width: 216px;
     height: 170px;
   }
+
+  .lamp-shade {
+    width: 36px;
+    height: 14px;
+  }
 }
 
 @media (max-width: 360px) {
-  .character-head {
-    width: 58px;
-    height: 66px;
-  }
-
-  .face {
-    width: 46px;
-    height: 54px;
-  }
-
-  .hair {
-    width: 60px;
-    height: 38px;
-  }
-
-  .character-torso {
-    width: 70px;
-    height: 90px;
+  .mira-svg {
+    width: 155px;
   }
 
   .cafe-table {
-    width: 170px;
+    width: 180px;
   }
 
   .status-badge {
     font-size: 11px;
     padding: 5px 12px;
+  }
+
+  .lamp-shade {
+    width: 30px;
+    height: 12px;
   }
 }
 
