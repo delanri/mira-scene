@@ -102,9 +102,9 @@
             <ellipse v-show="mouthState === 'open'" cx="100" cy="130" rx="6" ry="7" fill="#c48a70"/>
             <ellipse v-show="mouthState === 'speaking-mouth'" class="mouth-anim" cx="100" cy="130" rx="5.5" ry="5" fill="#c48a70"/>
 
-            <!-- Hair clip (star with glow) -->
+            <!-- Hair clip (silver star with glow) -->
             <g class="clip-g" filter="url(#clip-glow)">
-              <text x="146" y="88" font-size="13" fill="#e8c84c" font-family="sans-serif">✦</text>
+              <text x="146" y="88" font-size="13" fill="#c0c8d8" font-family="sans-serif">✦</text>
             </g>
 
             <!-- Body (raincoat — smooth trapezoid) -->
@@ -121,6 +121,11 @@
 
           <!-- Cafe table -->
           <div class="cafe-table">
+            <div class="camera">
+              <div class="camera-body">
+                <div class="camera-lens"></div>
+              </div>
+            </div>
             <div class="coffee-cup">
               <div class="steam"></div>
             </div>
@@ -172,8 +177,8 @@
 
       <!-- ===== Layer 4: Rain (z:22) ===== -->
       <div class="rain-container" :class="{ heavy: sceneBackground === 'rain_heavy' }">
-        <div class="rain-drop" v-for="n in 60" :key="n"
-             :style="{ left: `${Math.random()*100}%`, animationDelay: `${Math.random()*2}s`, animationDuration: `${0.4 + Math.random()*0.4}s` }">
+        <div class="rain-drop" v-for="n in 12" :key="n"
+             :style="{ left: `${Math.random()*100}%`, animationDelay: `${Math.random()*4}s`, animationDuration: `${1.6 + Math.random()*1.2}s` }">
         </div>
       </div>
 
@@ -211,8 +216,7 @@
             </svg>
           </button>
         </div>
-        <div class="interrupt-hint" v-if="characterState === 'speaking'">Tap mic or type to interrupt</div>
-        <div class="mode-badge">{{ apiMode === 'mock' ? 'DEMO' : 'LIVE' }}</div>
+        <div class="mode-badge">{{ apiMode === 'mock' ? '演示' : '在线' }}</div>
       </div>
     </div>
   </div>

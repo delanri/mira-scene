@@ -42,18 +42,18 @@ const app = createApp({
     // ===== Computed =====
     const statusText = computed(() => {
       const map = {
-        idle: 'Mira is here',
-        listening: 'Listening...',
-        thinking: 'Thinking...',
-        speaking: 'Speaking...',
+        idle: 'Mira 在等着谁',
+        listening: '在听…',
+        thinking: '等她想一下',
+        speaking: 'Mira 和你攀谈中…',
       };
       return map[characterState.value] || '';
     });
 
     const inputPlaceholder = computed(() => {
-      if (characterState.value === 'thinking') return 'Mira is thinking...';
-      if (characterState.value === 'speaking') return 'Type to interrupt...';
-      return 'Say something to Mira...';
+      if (characterState.value === 'thinking') return '她还在想…';
+      if (characterState.value === 'speaking') return '你可以随时插话';
+      return '向 Mira 搭话';
     });
 
     const emotionParticle = computed(() => {
@@ -173,8 +173,8 @@ const app = createApp({
         console.error('Chat error:', err);
         if (currentRequestId === requestId) {
           characterState.value = 'idle';
-          currentSubtitle.value = 'Sorry, something went wrong...';
-          displayedSubtitle.value = 'Sorry, something went wrong...';
+          currentSubtitle.value = '抱歉，Mira有点没听清…';
+          displayedSubtitle.value = '抱歉，Mira有点没听清…';
         }
       }
     }
