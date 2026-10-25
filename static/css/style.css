@@ -952,7 +952,7 @@ html, body {
 /* === Subtitle Area (z-index 30) === */
 .subtitle-area {
   position: absolute;
-  top: 63%;
+  top: 66%;
   left: 50%;
   transform: translateX(-50%);
   z-index: 30;
