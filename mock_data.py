@@ -31,7 +31,7 @@ MOCK_RESPONSES = [
         ]
     },
     {
-        "keywords": ["wait", "someone", "等", "谁", "expecting", "等人"],
+        "keywords": ["wait", "someone", "在等", "等谁", "expecting", "等人"],
         "priority": 2,
         "responses": [
             {
@@ -55,7 +55,7 @@ MOCK_RESPONSES = [
         "priority": 3,
         "responses": [
             {
-                "text": "要看吗？刚才在外面拍的——雨打在路灯上那种光晕，特别好看。我觉得拍得还不错。",
+                "text": "要看吗？上个月在冰岛拍的——黑沙滩上的北极光。在海边冻了三个晚上才等到。",
                 "emotion": "happy",
                 "action": "show_photo",
                 "scene_change": {"type": "event", "value": "show_photo"}
@@ -79,7 +79,7 @@ MOCK_RESPONSES = [
         "priority": 3,
         "responses": [
             {
-                "text": "去年跑了巴塔哥尼亚、北海道、还有苏格兰高地。哪里的光有意思就往哪里去。听着挺浪漫的吧？其实……一个人赶路的时候还挺空的。",
+                "text": "去年跑了巴塔哥尼亚、北海道，上个月刚从冰岛回来。哪里的光有意思就往哪里去。听着挺浪漫的吧？其实……一个人赶路的时候还挺空的。",
                 "emotion": "melancholy",
                 "action": "show_photo",
                 "scene_change": {"type": "event", "value": "show_photo"}

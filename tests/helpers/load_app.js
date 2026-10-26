@@ -16,6 +16,7 @@ const APP_PATH = path.join(__dirname, '..', '..', 'static', 'js', 'app.js');
  * @param {number}  [opts.chatTimeoutMs]   覆盖 20s 超时，测试里缩短
  * @param {boolean} [opts.speechRecognition=true]  浏览器是否支持语音识别
  * @param {boolean} [opts.speechSynthesis=false]   是否有语音合成（有的话可以手动触发 onstart/onboundary/onend）
+ * @param {boolean} [opts.speechFailsImmediately]   语音一开口就出错（测表情切换的竞态）
  */
 function loadApp(opts = {}) {
   let src = fs.readFileSync(APP_PATH, 'utf8');
@@ -49,7 +50,11 @@ function loadApp(opts = {}) {
   let SpeechSynthesisUtterance;
   if (opts.speechSynthesis) {
     window.speechSynthesis = {
-      speak(u) { ctl.utterances.push(u); },
+      speak(u) {
+        ctl.utterances.push(u);
+        // 模拟浏览器语音一开口就出错（一句话瞬间"说完"）
+        if (opts.speechFailsImmediately) setTimeout(() => u.onerror && u.onerror(), 0);
+      },
       cancel() {},
       getVoices() { return []; },
     };

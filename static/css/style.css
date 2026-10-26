@@ -978,8 +978,9 @@ html, body {
   animation: twinkle 3s ease-in-out infinite;
 }
 
+/* 3 秒一个周期：亮起 → 暗到完全看不见 → 在看不见的那一刻换位置（app.js moveStar）→ 再亮起 */
 @keyframes twinkle {
-  0%, 100% { opacity: 0.3; }
+  0%, 100% { opacity: 0; }
   50% { opacity: 1; }
 }
 

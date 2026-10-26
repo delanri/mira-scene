@@ -155,8 +155,11 @@
               <div class="aurora-scene">
                 <div class="aurora"></div>
                 <div class="mountains"></div>
-                <div class="stars" v-for="n in 12" :key="n"
-                     :style="{ left: `${Math.random()*100}%`, top: `${Math.random()*60}%`, animationDelay: `${Math.random()*3}s` }">
+                <!-- 位置在打开照片时算好一次（app.js openPhoto），模板里不再现算随机数：
+                     否则页面每次重新渲染（字幕出一个字、眨眼）星星都会跳位置、闪烁重来 -->
+                <div class="stars" v-for="s in photoStars" :key="s.id"
+                     :style="{ left: `${s.left}%`, top: `${s.top}%`, animationDelay: `${s.delay}s` }"
+                     @animationiteration="moveStar(s)">
                 </div>
               </div>
             </div>

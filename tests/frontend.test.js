@@ -177,6 +177,15 @@ test('浏览器报念到哪个词，字幕就跟到哪', async () => {
   assert.equal(app.displayedSubtitle.value, text, '说完显示整句');
 });
 
+// ================================================================ 表情
+test('一句话瞬间说完（语音出错）：害羞也会正常退回平常表情，不会卡住', async () => {
+  const { app } = loadApp({ fetch: reply({ text: '……谢谢。', emotion: 'shy' }), speechSynthesis: true, speechFailsImmediately: true });
+  say(app, '你好漂亮');
+  await wait(600);
+  assert.equal(app.characterState.value, 'idle');
+  assert.equal(app.currentEmotion.value, 'neutral');
+});
+
 // ================================================================ 相机
 test('举着相机时清动作：先进入放下阶段，1 秒后才清掉', async () => {
   const { app } = loadApp({ fetch: reply({ text: '嗯。' }) });

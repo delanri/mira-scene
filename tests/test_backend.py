@@ -60,6 +60,13 @@ class TestKeywordMatching(unittest.TestCase):
         self.assertEqual(resp["action"], "show_photo")
         self.assertEqual(resp["scene_change"], {"type": "event", "value": "show_photo"})
 
+    def test_waiting_keywords_dont_overmatch(self):
+        # "等一下""谁知道呢"不该触发"在等谁"那条（熟络阶段会突然说真话）
+        for msg in ("等一下", "谁知道呢"):
+            self.assertNotIn("停下来", get_mock_response(msg, 0, 3)["text"], msg)
+        for msg in ("你在等谁", "在等人吗", "你是不是在等人"):
+            self.assertIn("停下来", get_mock_response(msg, 0, 3)["text"], msg)
+
     def test_compliment_is_shy(self):
         self.assertEqual(get_mock_response("你好漂亮")["emotion"], "shy")
 

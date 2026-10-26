@@ -22,6 +22,7 @@ const app = createApp({
     const isTypingSubtitle = ref(false);
     const isSubtitleFading = ref(false);
     const showPhoto = ref(false);
+    const photoStars = ref([]); // 照片里星星的位置，打开照片时生成一次
     const showParticles = ref(false);
     const isRecording = ref(false);
     const apiMode = ref('mock'); // mock | live | fallback（在线但 DeepSeek 失败，用了演示回复）
@@ -41,6 +42,8 @@ const app = createApp({
     let actionTimer = null;
     let putDownTimer = null;
     let particleTimer = null;
+    let emotionTimer = null;
+    let targetEmotion = 'neutral'; // 正要切成的表情（眨眼 150ms 后才真正落到 currentEmotion）
     let pendingPhotoShow = false;
     let turnCount = 0;
     let chatAbort = null;   // 当前这轮 /api/chat 的 AbortController
@@ -226,7 +229,7 @@ const app = createApp({
 
           // show_photo: 说完话再给照片，相机动作悄悄收回
           if (pendingPhotoShow) {
-            showPhoto.value = true;
+            openPhoto();
             pendingPhotoShow = false;
             setTimeout(() => {
               if (currentAction.value === 'show_photo') {
@@ -289,6 +292,28 @@ const app = createApp({
       hintTimer = setTimeout(() => { inputHint.value = ''; }, 4000);
     }
 
+    // ===== Photo =====
+    const STAR_COUNT = 12;
+
+    function randomStarPos() {
+      return { left: Math.random() * 100, top: Math.random() * 60 };
+    }
+
+    // 打开照片：星星位置只在这里生成一次
+    function openPhoto() {
+      photoStars.value = Array.from({ length: STAR_COUNT }, (_, id) => ({
+        id,
+        ...randomStarPos(),
+        delay: -Math.random() * 3, // 负延迟 = 一开始就处在周期的不同位置，星星错开闪
+      }));
+      showPhoto.value = true;
+    }
+
+    // 一个闪烁周期结束（此刻完全透明）→ 换到新位置再亮起
+    function moveStar(star) {
+      Object.assign(star, randomStarPos());
+    }
+
     // ===== Scene Changes =====
     function applySceneChanges(data) {
       if (!data.scene_change) return;
@@ -321,11 +346,15 @@ const app = createApp({
 
     // ===== Emotion =====
     function applyEmotion(emotion) {
-      if (currentEmotion.value === emotion) return;
+      // 跟「正要切成的表情」比，而不是跟当前显示的比：
+      // 上一个表情还在 150ms 眨眼里没落地时，又要切回原表情，不能被当成"已经是了"跳过（否则脸红会卡住）
+      if (targetEmotion === emotion) return;
+      targetEmotion = emotion;
 
       // 切换表情前眨一下眼，眼睛大小变化藏在眨眼里更自然
       isBlinking.value = true;
-      setTimeout(() => {
+      clearTimeout(emotionTimer); // 上一个还没落地的切换作废，只认最新的
+      emotionTimer = setTimeout(() => {
         // 眼睛还闭着 → 先切 emotion（眼型在闭眼状态下静默切换）
         currentEmotion.value = emotion;
 
@@ -804,6 +833,7 @@ const app = createApp({
       clearTimeout(actionTimer);
       clearTimeout(putDownTimer);
       clearTimeout(particleTimer);
+      clearTimeout(emotionTimer);
       clearTimeout(hintTimer);
       if (chatAbort) chatAbort.abort();
       stopCurrentAudio();
@@ -829,6 +859,7 @@ const app = createApp({
       isTypingSubtitle,
       isSubtitleFading,
       showPhoto,
+      photoStars,
       showParticles,
       isRecording,
       apiMode,
@@ -846,6 +877,7 @@ const app = createApp({
       // Methods
       sendMessage,
       retryLast,
+      moveStar,
       startRecording,
       stopRecording,
     };
