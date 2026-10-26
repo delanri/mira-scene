@@ -5,7 +5,7 @@
 ## 使用的 AI 工具
 
 - **Claude（Anthropic）**：代码实现、CSS 动画编写、技术方案讨论、Bug 排查、自动化测试
-- **DeepSeek Chat（V3）**：项目运行时的角色对话生成（后端集成），不参与开发
+- **DeepSeek Chat（`deepseek-chat` 接口）**：项目运行时的角色对话生成（后端集成），不参与开发
 
 ## 我做了什么 vs AI 做了什么
 
