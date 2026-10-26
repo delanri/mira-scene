@@ -1,0 +1,20 @@
+# 一条命令启动：docker compose up
+# 没有 .env 也能跑（演示模式 + 内置照片）
+services:
+  mira:
+    build: .
+    ports:
+      - "5000:5000"
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      # 容器里要连你电脑上的 ComfyUI，用 host.docker.internal 而不是 127.0.0.1
+      # （在 .env 里写 COMFYUI_URL=http://host.docker.internal:8188）
+      - MIRA_DEBUG=0
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      # 数据库和生成的照片留在宿主机，重建容器不会丢
+      - ./data:/app/data
+      - ./static/generated:/app/static/generated

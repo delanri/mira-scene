@@ -1,0 +1,21 @@
+{
+  // 只做类型检查，不编译、不改运行方式：浏览器直接跑 static/js 里的原文件
+  // 运行：npm run typecheck（需要先 npm install 装 TypeScript）
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": true,
+    "noEmit": true,
+    "target": "ES2022",
+    "module": "ES2022",
+    "moduleResolution": "bundler",
+    "lib": ["ES2022", "DOM"],
+    "strict": true,
+    "noImplicitAny": false,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "skipLibCheck": true
+  },
+  "include": ["static/js/*.js", "static/js/vue.global.prod.js"],
+  "exclude": ["static/js/vue.global.prod.js"]
+}

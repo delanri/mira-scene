@@ -149,10 +149,18 @@
         </div>
 
         <!-- Photo overlay (polaroid) -->
-        <div class="photo-overlay" v-if="showPhoto" @click="showPhoto = false">
+        <div class="photo-overlay" v-if="showPhoto" @click="closePhoto">
           <div class="polaroid">
             <div class="photo-image">
-              <div class="aurora-scene">
+              <!-- 生成好的照片：加载完以后像拍立得一样慢慢显影 -->
+              <img v-if="photoView.phase === 'ready'" class="photo-generated" :src="photoView.url" alt=""
+                   @load="$event.target.classList.add('developed')" @error="onPhotoError">
+              <!-- 还在生成：照片框先出来，她在翻相机 -->
+              <div v-else-if="photoView.phase === 'developing'" class="photo-developing">
+                <span class="developing-text">她在翻相机…</span>
+              </div>
+              <!-- 内置照片：没配生图 / 生成失败 / 超时 -->
+              <div v-else class="aurora-scene">
                 <div class="aurora"></div>
                 <div class="mountains"></div>
                 <!-- 位置在打开照片时算好一次（app.js openPhoto），模板里不再现算随机数：
@@ -163,7 +171,7 @@
                 </div>
               </div>
             </div>
-            <p class="photo-caption">冰岛，上个月 —— 黑沙滩上的北极光</p>
+            <p class="photo-caption">{{ photoView.caption }}</p>
           </div>
         </div>
       </div>
@@ -243,6 +251,7 @@
 
   <!-- Vue 放在本地（static/js/vue.global.prod.js, v3.4.38），不依赖外网 CDN，打开就能用 -->
   <script src="/js/vue.global.prod.js"></script>
-  <script src="/js/app.js"></script>
+  <!-- 应用代码按功能拆成 ES 模块（static/js/*.js），浏览器原生加载，不需要构建 -->
+  <script type="module" src="/js/main.js"></script>
 </body>
 </html>

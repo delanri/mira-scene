@@ -1,2 +1,6 @@
 __pycache__/
 .env
+# 运行时生成：SQLite 数据库、生成的照片
+data/
+static/generated/
+node_modules/

@@ -984,6 +984,59 @@ html, body {
   50% { opacity: 1; }
 }
 
+/* --- 生成的照片：加载完后像拍立得显影（从暗、模糊、偏黄到清晰） --- */
+.photo-generated {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  opacity: 0;
+}
+
+.photo-generated.developed {
+  animation: photo-develop 2.8s ease-out forwards;
+}
+
+@keyframes photo-develop {
+  0%   { opacity: 0.15; filter: blur(6px) brightness(0.35) sepia(0.7) saturate(0.4); }
+  40%  { opacity: 0.8;  filter: blur(3px) brightness(0.7) sepia(0.4) saturate(0.7); }
+  100% { opacity: 1;    filter: none; }
+}
+
+/* --- 还在生成：显影液里那种暗暗的、慢慢流动的底色 --- */
+.photo-developing {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 14px;
+  background:
+    radial-gradient(ellipse 70% 60% at 40% 45%, rgba(120, 100, 70, 0.35) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 50% at 65% 60%, rgba(70, 80, 110, 0.35) 0%, transparent 70%),
+    #1a1814;
+  background-size: 160% 160%;
+  animation: developing-flow 3.5s ease-in-out infinite alternate;
+}
+
+@keyframes developing-flow {
+  0%   { background-position: 0% 0%; }
+  100% { background-position: 100% 100%; }
+}
+
+.developing-text {
+  font-size: 12px;
+  line-height: 1.6;
+  color: rgba(255, 245, 225, 0.55);
+  letter-spacing: 1px;
+  animation: developing-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes developing-pulse {
+  0%, 100% { opacity: 0.4; }
+  50%      { opacity: 0.9; }
+}
+
 .photo-caption {
   font-family: 'Courier New', monospace;
   font-size: 11px;

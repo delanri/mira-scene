@@ -58,7 +58,11 @@ MOCK_RESPONSES = [
                 "text": "要看吗？上个月在冰岛拍的——黑沙滩上的北极光。在海边冻了三个晚上才等到。",
                 "emotion": "happy",
                 "action": "show_photo",
-                "scene_change": {"type": "event", "value": "show_photo"}
+                "scene_change": {"type": "event", "value": "show_photo"},
+                "photo": {
+                    "prompt": "Aurora borealis over a black sand beach in Iceland at night, green and violet lights reflected on the wet sand, small waves, dark mountains on the horizon, stars",
+                    "caption": "冰岛，上个月 —— 黑沙滩上的北极光",
+                },
             }
         ]
     },
@@ -82,7 +86,11 @@ MOCK_RESPONSES = [
                 "text": "去年跑了巴塔哥尼亚、北海道，上个月刚从冰岛回来。哪里的光有意思就往哪里去。听着挺浪漫的吧？其实……一个人赶路的时候还挺空的。",
                 "emotion": "melancholy",
                 "action": "show_photo",
-                "scene_change": {"type": "event", "value": "show_photo"}
+                "scene_change": {"type": "event", "value": "show_photo"},
+                "photo": {
+                    "prompt": "Aurora borealis over a black sand beach in Iceland at night, green and violet lights reflected on the wet sand, small waves, dark mountains on the horizon, stars",
+                    "caption": "冰岛，上个月 —— 黑沙滩上的北极光",
+                },
             }
         ]
     },
@@ -253,6 +261,7 @@ def get_mock_response(message: str, turn_count: int = 0, affinity: int = 1) -> d
             "emotion": resp["emotion"],
             "action": resp["action"],
             "scene_change": resp["scene_change"],
+            "photo": resp.get("photo"),  # 拿相机时那张照片的描述（配置了生图才会用到）
         }
 
     # Default response

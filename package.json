@@ -1,0 +1,14 @@
+{
+  "name": "mira-scene",
+  "private": true,
+  "description": "开发用脚本。运行项目本身不需要 npm：pip install -r requirements.txt && python server.py",
+  "scripts": {
+    "test": "node --test && python -m unittest",
+    "test:frontend": "node --test",
+    "test:backend": "python -m unittest",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0"
+  }
+}

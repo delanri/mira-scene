@@ -1,31 +1,26 @@
 /**
- * 在 Node 里跑真实的 static/js/app.js（不需要浏览器、不需要真 Vue）。
+ * 在 Node 里跑真实的前端代码（static/js/*.js，不需要浏览器、不需要真 Vue）。
  *
- * 做法：用一个最小的「假 Vue」（ref / computed 只保留 .value），
- * 把浏览器 API（fetch、语音识别、语音合成）换成测试能控制的假对象，
- * 然后执行 app.js，拿到 setup() 返回的状态和方法直接断言。
+ * 前端所有浏览器能力都是从 createMiraApp(env) 传进去的，所以这里给它一套「假浏览器」：
+ * 最小的假 Vue（ref / computed 只保留 .value）、测试能控制的 fetch、语音识别、语音合成。
+ * 每次 loadApp 都是全新的一套，测试之间互不影响。
  */
-const fs = require('fs');
 const path = require('path');
+const { pathToFileURL } = require('url');
 
-const APP_PATH = path.join(__dirname, '..', '..', 'static', 'js', 'app.js');
+const MIRA_URL = pathToFileURL(path.join(__dirname, '..', '..', 'static', 'js', 'mira.js')).href;
 
 /**
  * @param {object} opts
  * @param {(url: string, init: object) => Promise} opts.fetch  /api/chat 的假实现
+ * @param {(jobId: string, n: number) => object} [opts.photo]  /api/photo/<id> 的假返回（n = 第几次查询）
  * @param {number}  [opts.chatTimeoutMs]   覆盖 20s 超时，测试里缩短
  * @param {boolean} [opts.speechRecognition=true]  浏览器是否支持语音识别
  * @param {boolean} [opts.speechSynthesis=false]   是否有语音合成（有的话可以手动触发 onstart/onboundary/onend）
  * @param {boolean} [opts.speechFailsImmediately]   语音一开口就出错（测表情切换的竞态）
  */
-function loadApp(opts = {}) {
-  let src = fs.readFileSync(APP_PATH, 'utf8');
-  if (opts.chatTimeoutMs) {
-    const before = src;
-    src = src.replace(/const CHAT_TIMEOUT_MS = \d+;/, `const CHAT_TIMEOUT_MS = ${opts.chatTimeoutMs};`);
-    if (src === before) throw new Error('app.js 里找不到 CHAT_TIMEOUT_MS');
-  }
-
+async function loadApp(opts = {}) {
+  const { createMiraApp } = await import(MIRA_URL);
   const ctl = { recognition: null, utterances: [], chatCalls: [] };
 
   let app;
@@ -61,10 +56,21 @@ function loadApp(opts = {}) {
     SpeechSynthesisUtterance = class { constructor(text) { this.text = text; } };
   }
 
-  // fetch：/api/tts 固定让前端用浏览器语音；/api/chat 交给测试
+  // fetch：/api/tts 固定让前端用浏览器语音；/api/event 记下来；/api/photo 交给 opts.photo；/api/chat 交给测试
+  ctl.events = [];
+  ctl.photoPolls = 0;
   const fetch = (url, init) => {
     if (url === '/api/tts') {
       return Promise.resolve({ headers: { get: () => 'application/json' }, json: async () => ({ use_browser_tts: true }) });
+    }
+    if (url === '/api/event') {
+      ctl.events.push(JSON.parse(init.body));
+      return Promise.resolve({ ok: true, json: async () => ({ ok: true }) });
+    }
+    if (url.startsWith('/api/photo/')) {
+      ctl.photoPolls++;
+      const data = opts.photo ? opts.photo(url.split('/').pop(), ctl.photoPolls) : { status: 'failed' };
+      return Promise.resolve({ ok: true, json: async () => data });
     }
     const body = JSON.parse(init.body);
     ctl.chatCalls.push(body);
@@ -73,9 +79,8 @@ function loadApp(opts = {}) {
 
   const requestAnimationFrame = (f) => setTimeout(f, 16);
 
-  new Function('Vue', 'window', 'fetch', 'SpeechSynthesisUtterance', 'requestAnimationFrame', src)(
-    Vue, window, fetch, SpeechSynthesisUtterance, requestAnimationFrame,
-  );
+  const config = opts.chatTimeoutMs ? { CHAT_TIMEOUT_MS: opts.chatTimeoutMs } : {};
+  createMiraApp({ Vue, window, fetch, SpeechSynthesisUtterance, requestAnimationFrame }, config).mount();
   return { app, ctl };
 }
 
