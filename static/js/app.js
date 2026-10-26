@@ -243,7 +243,7 @@ const app = createApp({
       // 切换表情前眨一下眼，眼睛大小变化藏在眨眼里更自然
       isBlinking.value = true;
       setTimeout(() => {
-        isBlinking.value = false;
+        // 眼睛还闭着 → 先切 emotion（眼型在闭眼状态下静默切换）
         currentEmotion.value = emotion;
 
         // 说话中不覆盖嘴巴动画，只在非说话状态才切嘴型
@@ -255,6 +255,11 @@ const app = createApp({
             default: mouthState.value = ''; break;
           }
         }
+
+        // 下一帧再睁眼 → 新眼型已经就位，看不到过渡
+        requestAnimationFrame(() => {
+          isBlinking.value = false;
+        });
 
         // Show particles briefly
         triggerParticles();

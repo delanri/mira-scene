@@ -285,21 +285,24 @@ html, body {
 
 /* --- Eye blink via SVG attribute transition --- */
 .blink .eye-shape {
-  ry: 1.5;
-  transition: ry 0.12s ease;
+  ry: 1.5 !important;
+  rx: 5.5 !important;
+  transition: ry 0.12s ease, rx 0.12s ease;
 }
 
 .blink .eye-hl {
   opacity: 0;
-  transition: opacity 0.1s ease;
+  transition: opacity 0.06s ease;
 }
 
+/* 睁眼要快（和闭眼差不多），慢慢睁会像半梦半醒 */
 .eye-shape {
-  transition: ry 0.5s ease, rx 0.5s ease, opacity 0.5s ease;
+  transition: ry 0.15s ease-out, rx 0.15s ease-out, opacity 0.3s ease;
 }
 
+/* 高光等眼睛睁开后再出现，否则白点会浮在半闭的眼睛上面 */
 .eye-hl {
-  transition: opacity 0.1s ease;
+  transition: opacity 0.1s ease 0.12s;
 }
 
 /* --- Mouth animation (speaking) --- */
@@ -324,6 +327,9 @@ html, body {
 
 .clip-g {
   transition: transform 0.4s ease, opacity 0.3s ease;
+  /* origin 必须写在基础状态上：放手时 class 移除，origin 若跟着变回 0 0，
+     缩回去的那 0.4s 就会绕左上角缩放 → 发夹飞走 */
+  transform-origin: 152px 83px;
 }
 
 /* Action: touch hair clip — right hand reaches up to clip */
@@ -334,8 +340,6 @@ html, body {
 /* 摸发夹时星星闪一下 */
 .character-container.touch_hair_clip .clip-g {
   transform: scale(1.3);
-  transform-box: fill-box;
-  transform-origin: center;
   animation: clip-sparkle 0.5s ease-in-out 3;
 }
 
@@ -345,11 +349,21 @@ html, body {
 }
 
 /* show_photo（聊摄影）: 左手拿起相机举到胸口 */
+/* 手：弧形轨迹伸到相机左上角；停留位置写在 transform 上，
+   这样收回时走 .hand-l 的 transition，不会瞬间弹回 */
 .character-container.show_photo .hand-l {
-  transform: translate(46px, -56px);
+  transform: translate(38px, -60px);
+  animation: hand-reach-camera 0.8s ease-out;
 }
 .character-container.show_photo .camera {
   transform: translate(-5px, -55px) rotate(-8deg);
+  transition: transform 0.7s ease-out;
+}
+
+@keyframes hand-reach-camera {
+  0% { transform: translate(0, 0); }
+  40% { transform: translate(28px, -35px); }
+  100% { transform: translate(38px, -60px); }
 }
 
 /* look_away（被夸）: 双手捂嘴 */
@@ -380,12 +394,13 @@ html, body {
 }
 
 @keyframes hand-coffee-sway {
-  0% { transform: translate(44px, -3px); }
-  20% { transform: translate(44px, -18px); }
-  35% { transform: translate(44px, -15px); }
-  50% { transform: translate(44px, -17px); }
-  65% { transform: translate(44px, -14px); }
-  80% { transform: translate(44px, -9px); }
+  0% { transform: translate(0, 0); }
+  12% { transform: translate(44px, -3px); }
+  28% { transform: translate(44px, -18px); }
+  42% { transform: translate(44px, -15px); }
+  55% { transform: translate(44px, -17px); }
+  68% { transform: translate(44px, -14px); }
+  82% { transform: translate(44px, -9px); }
   100% { transform: translate(44px, -3px); }
 }
 
@@ -501,11 +516,12 @@ html, body {
 
 @keyframes coffee-sway {
   0% { transform: translateY(0) rotate(0); }
-  20% { transform: translateY(-15px) rotate(-12deg); }
-  35% { transform: translateY(-12px) rotate(8deg); }
-  50% { transform: translateY(-14px) rotate(-5deg); }
-  65% { transform: translateY(-11px) rotate(4deg); }
-  80% { transform: translateY(-6px) rotate(-2deg); }
+  12% { transform: translateY(0) rotate(0); }
+  28% { transform: translateY(-15px) rotate(-12deg); }
+  42% { transform: translateY(-12px) rotate(8deg); }
+  55% { transform: translateY(-14px) rotate(-5deg); }
+  68% { transform: translateY(-11px) rotate(4deg); }
+  82% { transform: translateY(-6px) rotate(-2deg); }
   100% { transform: translateY(0) rotate(0); }
 }
 
@@ -612,8 +628,6 @@ html, body {
 }
 .character-container.happy .clip-g {
   transform: rotate(10deg) scale(1.1);
-  transform-box: fill-box;
-  transform-origin: center;
 }
 
 .character-container.melancholy {
