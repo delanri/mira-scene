@@ -334,7 +334,8 @@ html, body {
 /* 摸发夹时星星闪一下 */
 .character-container.touch_hair_clip .clip-g {
   transform: scale(1.3);
-  transform-origin: 152px 85px;
+  transform-box: fill-box;
+  transform-origin: center;
   animation: clip-sparkle 0.5s ease-in-out 3;
 }
 
@@ -343,9 +344,12 @@ html, body {
   50% { opacity: 0.4; }
 }
 
-/* show_photo: 左手捂嘴 */
+/* show_photo（聊摄影）: 左手拿起相机举到胸口 */
 .character-container.show_photo .hand-l {
-  transform: translate(30px, -130px);
+  transform: translate(46px, -56px);
+}
+.character-container.show_photo .camera {
+  transform: translate(-5px, -55px) rotate(-8deg);
 }
 
 /* look_away（被夸）: 双手捂嘴 */
@@ -369,9 +373,20 @@ html, body {
   80% { ry: 5; }
 }
 
-/* sip_coffee（聊咖啡）: 右手举杯晃晃放回去 */
+/* sip_coffee（聊咖啡）: 右手拿着杯把，手和杯子一起晃 */
 .character-container.sip_coffee .hand-r {
-  transform: translate(-30px, -20px);
+  transform: translate(44px, -3px);
+  animation: hand-coffee-sway 2.5s ease-in-out;
+}
+
+@keyframes hand-coffee-sway {
+  0% { transform: translate(44px, -3px); }
+  20% { transform: translate(44px, -18px); }
+  35% { transform: translate(44px, -15px); }
+  50% { transform: translate(44px, -17px); }
+  65% { transform: translate(44px, -14px); }
+  80% { transform: translate(44px, -9px); }
+  100% { transform: translate(44px, -3px); }
 }
 
 /* === Cafe Table === */
@@ -499,6 +514,7 @@ html, body {
   position: absolute;
   right: 94px;
   bottom: 7px;
+  transition: transform 0.5s ease;
 }
 
 .camera-body {
@@ -596,7 +612,8 @@ html, body {
 }
 .character-container.happy .clip-g {
   transform: rotate(10deg) scale(1.1);
-  transform-origin: 152px 68px;
+  transform-box: fill-box;
+  transform-origin: center;
 }
 
 .character-container.melancholy {

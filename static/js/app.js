@@ -37,6 +37,7 @@ const app = createApp({
     let subtitleFadeTimer = null;
     let actionTimer = null;
     let particleTimer = null;
+    let pendingPhotoShow = false;
     let turnCount = 0;
 
     // ===== Computed =====
@@ -165,8 +166,19 @@ const app = createApp({
           characterState.value = 'idle';
           mouthState.value = '';
 
-          // 语音说完立刻回 neutral（眼睛恢复原样），不等气泡消失
-          currentEmotion.value = 'neutral';
+          // 语音说完眨一下眼回 neutral，过渡更自然
+          applyEmotion('neutral');
+
+          // show_photo: 说完话再给照片，相机动作悄悄收回
+          if (pendingPhotoShow) {
+            showPhoto.value = true;
+            pendingPhotoShow = false;
+            setTimeout(() => {
+              if (currentAction.value === 'show_photo') {
+                currentAction.value = '';
+              }
+            }, 800);
+          }
 
           // Start fade-out after 4 seconds
           subtitleFadeTimer = setTimeout(() => {
@@ -208,7 +220,7 @@ const app = createApp({
           if (value === 'lightning') triggerLightning();
           break;
         case 'event':
-          if (value === 'show_photo') showPhoto.value = true;
+          if (value === 'show_photo') pendingPhotoShow = true;
           if (value === 'lights_flicker') triggerFlicker();
           break;
       }
@@ -226,18 +238,27 @@ const app = createApp({
 
     // ===== Emotion =====
     function applyEmotion(emotion) {
-      currentEmotion.value = emotion;
+      if (currentEmotion.value === emotion) return;
 
-      // Mouth shape based on emotion
-      switch (emotion) {
-        case 'happy': mouthState.value = 'smile'; break;
-        case 'melancholy': mouthState.value = 'slight'; break;
-        case 'surprised': mouthState.value = 'open'; break;
-        default: mouthState.value = ''; break;
-      }
+      // 切换表情前眨一下眼，眼睛大小变化藏在眨眼里更自然
+      isBlinking.value = true;
+      setTimeout(() => {
+        isBlinking.value = false;
+        currentEmotion.value = emotion;
 
-      // Show particles briefly
-      triggerParticles();
+        // 说话中不覆盖嘴巴动画，只在非说话状态才切嘴型
+        if (characterState.value !== 'speaking') {
+          switch (emotion) {
+            case 'happy': mouthState.value = 'smile'; break;
+            case 'melancholy': mouthState.value = 'slight'; break;
+            case 'surprised': mouthState.value = 'open'; break;
+            default: mouthState.value = ''; break;
+          }
+        }
+
+        // Show particles briefly
+        triggerParticles();
+      }, 150);
     }
 
     function triggerParticles() {
@@ -253,9 +274,12 @@ const app = createApp({
       if (!action) return;
       currentAction.value = action;
       clearTimeout(actionTimer);
-      actionTimer = setTimeout(() => {
-        currentAction.value = '';
-      }, 3000);
+      // show_photo 的动作等到说完话才收回（相机举着不放）
+      if (action !== 'show_photo') {
+        actionTimer = setTimeout(() => {
+          currentAction.value = '';
+        }, 3000);
+      }
     }
 
     function clearAction() {
@@ -437,6 +461,7 @@ const app = createApp({
       characterState.value = 'idle';
       mouthState.value = '';
       clearAction();
+      pendingPhotoShow = false;
     }
 
     // ===== Speech Recognition (STT) =====

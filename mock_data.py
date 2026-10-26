@@ -11,7 +11,7 @@ MOCK_RESPONSES = [
             {
                 "text": "啊……你好。抱歉，刚刚在看外面的雨发呆。今晚的雨好大，对吧？",
                 "emotion": "surprised",
-                "action": "touch_hair_clip",
+                "action": None,
                 "scene_change": None
             }
         ]
@@ -28,7 +28,7 @@ MOCK_RESPONSES = [
         ]
     },
     {
-        "keywords": ["wait", "someone", "等", "谁", "expecting", "等人", "一个人"],
+        "keywords": ["wait", "someone", "等", "谁", "expecting", "等人"],
         "responses": [
             {
                 "text": "等人？……也不算吧。就是拍完照有点空，想找个地方坐一会儿。",
@@ -189,7 +189,7 @@ DEFAULT_RESPONSES = [
     {
         "text": "说到这个我突然想起来，在冰岛的时候也遇到过类似的事。不过那是另一个故事了。",
         "emotion": "happy",
-        "action": "touch_hair_clip",
+        "action": "sip_coffee",
         "scene_change": None
     },
 ]
@@ -199,16 +199,24 @@ def get_mock_response(message: str, turn_count: int = 0) -> dict:
     """Get a mock response based on message keywords."""
     message_lower = message.lower()
 
+    # 优先匹配最长关键词，避免"你好看"误匹配"你好"
+    best_match = None
+    best_keyword_len = 0
+
     for entry in MOCK_RESPONSES:
         for keyword in entry["keywords"]:
-            if keyword in message_lower:
-                resp = random.choice(entry["responses"])
-                return {
-                    "text": resp["text"],
-                    "emotion": resp["emotion"],
-                    "action": resp["action"],
-                    "scene_change": resp["scene_change"],
-                }
+            if keyword in message_lower and len(keyword) >= best_keyword_len:
+                best_match = entry
+                best_keyword_len = len(keyword)
+
+    if best_match:
+        resp = random.choice(best_match["responses"])
+        return {
+            "text": resp["text"],
+            "emotion": resp["emotion"],
+            "action": resp["action"],
+            "scene_change": resp["scene_change"],
+        }
 
     # Default response
     resp = DEFAULT_RESPONSES[turn_count % len(DEFAULT_RESPONSES)]

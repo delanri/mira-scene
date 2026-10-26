@@ -5,8 +5,7 @@
 ## 使用的 AI 工具
 
 - **Claude（Anthropic）**：代码实现、CSS 动画编写、技术方案讨论
-- **OpenAI GPT-4o-mini**：项目运行时角色对话生成（后端集成）
-- **OpenAI TTS**：项目运行时角色语音合成（后端集成）
+- **DeepSeek Chat（V3）**：项目运行时角色对话生成（后端集成）  ← 改
 
 ## 我做了什么 vs AI 做了什么
 
@@ -28,14 +27,14 @@
 - Vue 3 Composition API 应用代码编写（app.js）
 - CSS 动画实现 —— 水珠滑落、蒸汽上升、眨眼、说话口型、闪电、字幕渐隐等
 - SVG 角色绘制 —— 将设计意图转化为 SVG 路径和渐变
-- Flask 后端搭建 —— 路由、OpenAI API 集成、TTS 接口
+- Flask 后端搭建 —— 路由、DeepSeek API 集成  ← 改
 - Mock 数据结构设计 —— 关键词匹配对话系统
 - 响应式布局和浏览器兼容处理
 - Bug 修复 —— Vue `v-once` 指令解决水珠重渲染闪烁、CSS 动画性能优化
 
 **技术方案讨论：**
 - 语音识别方案选型（Web Speech API vs 第三方服务）
-- TTS 方案（OpenAI API + 浏览器 fallback 双保险）
+- TTS 方案选型（最终采用浏览器原生 SpeechSynthesis）  ← 改
 - 多模态能力实现方案（DALL-E 图片生成 + Mock fallback）
 
 ## 协作方式
