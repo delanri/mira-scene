@@ -1,6 +1,6 @@
 # Mira — 雨夜咖啡馆
 
-一个实时交互角色场景体验。暴雨过后的深夜，透过咖啡馆的玻璃窗，遇见一个等着谁的旅行摄影师。
+一个实时交互角色场景体验。暴雨过后的深夜，透过咖啡馆的玻璃窗，遇见一个刚拍完雨景、想找人聊聊天的旅行摄影师。
 
 ## 预览
 
@@ -21,7 +21,7 @@
 
 - **前端**：Vue 3 Composition API（CDN，无构建步骤）、纯 CSS 动画、内联 SVG 角色
 - **后端**：Flask（Python）
-- **AI 服务**：OpenAI GPT-4o-mini（对话）、OpenAI TTS（语音合成）
+- **AI 服务**：DeepSeek Chat（对话）、浏览器 SpeechSynthesis（语音合成）
 - **语音识别**：Web Speech API（浏览器原生，推荐 Chrome）
 
 ## 运行
@@ -32,7 +32,7 @@ pip install flask python-dotenv requests
 
 # 2. 配置环境变量（可选，不配置则自动进入 Mock 演示模式）
 cp .env.example .env
-# 编辑 .env，填入 OPENAI_API_KEY
+# 编辑 .env，填入 DEEPSEEK_API_KEY
 
 # 3. 启动
 python server.py
@@ -44,7 +44,7 @@ python server.py
 
 ```
 mira-scene/
-├── server.py          # Flask 后端 + OpenAI API 集成
+├── server.py          # Flask 后端 + DeepSeek API 集成
 ├── mock_data.py       # Mock 模式预设对话数据
 ├── static/
 │   ├── index.html     # 场景页面（Vue 3 模板 + 内联 SVG 角色）

@@ -295,7 +295,7 @@ html, body {
 }
 
 .eye-shape {
-  transition: ry 0.12s ease, rx 0.2s ease;
+  transition: ry 0.5s ease, rx 0.5s ease, opacity 0.5s ease;
 }
 
 .eye-hl {
@@ -322,14 +322,30 @@ html, body {
   transition: transform 0.5s ease;
 }
 
-/* Action: touch hair clip — left hand moves up to head */
-.character-container.touch_hair_clip .hand-l {
-  transform: translate(30px, -130px);
+.clip-g {
+  transition: transform 0.4s ease, opacity 0.3s ease;
 }
 
-/* Action: sip coffee — right hand moves down-right to cup */
+/* Action: touch hair clip — right hand reaches up to clip */
+.character-container.touch_hair_clip .hand-r {
+  transform: translate(4px, -180px);
+}
+
+/* 摸发夹时星星闪一下 */
+.character-container.touch_hair_clip .clip-g {
+  transform: scale(1.3);
+  transform-origin: 152px 85px;
+  animation: clip-sparkle 0.5s ease-in-out 3;
+}
+
+@keyframes clip-sparkle {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* Action: sip coffee — right hand lifts toward cup */
 .character-container.sip_coffee .hand-r {
-  transform: translate(-15px, 8px);
+  transform: translate(-30px, -20px);
 }
 
 /* === Cafe Table === */
@@ -438,7 +454,7 @@ html, body {
 }
 
 .character-container.sip_coffee .coffee-cup {
-  transform: translateY(-4px) rotate(-5deg);
+  transform: translateY(-8px) rotate(-12deg);
 }
 
 /* === Camera (on cafe table) === */
@@ -539,7 +555,7 @@ html, body {
 
 /* === Emotion States (targeting SVG elements) === */
 .character-container.happy {
-  transform: rotate(-1deg);
+  /* 情绪通过 SVG 内部元素（嘴巴、发夹）表达，不旋转整个容器 */
 }
 .character-container.happy .clip-g {
   transform: rotate(10deg) scale(1.1);
@@ -547,7 +563,7 @@ html, body {
 }
 
 .character-container.melancholy {
-  transform: translateY(2px);
+  /* 情绪通过眼睛半闭表达，不位移整个容器 */
 }
 .character-container.melancholy .eye-shape {
   ry: 4.5;
@@ -560,9 +576,9 @@ html, body {
 }
 
 .character-container.curious {
-  transform: rotate(3deg);
+  /* 情绪通过眼睛微放大表达，不旋转整个容器 */
 }
-.character-container.curious .eye-r {
+.character-container.curious .eye-shape {
   rx: 6.5;
   ry: 7.5;
 }

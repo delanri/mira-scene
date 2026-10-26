@@ -14,37 +14,51 @@ load_dotenv()
 app = Flask(__name__, static_folder="static", static_url_path="")
 
 # ---------- Config ----------
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
-OPENAI_TTS_VOICE = os.getenv("OPENAI_TTS_VOICE", "nova")
+DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY", "")
 FORCE_MOCK = os.getenv("FORCE_MOCK", "false").lower() == "true"
-USE_MOCK = FORCE_MOCK or not OPENAI_API_KEY
+USE_MOCK = FORCE_MOCK or not DEEPSEEK_API_KEY
 
-MIRA_SYSTEM_PROMPT = """You are Mira, a 26-year-old travel photographer. You're sitting in a coffee shop that's about to close on a rainy night. You're wearing an amber raincoat and have a silver star-shaped hair clip. You seem to be waiting for someone but won't say who directly.
+MIRA_SYSTEM_PROMPT = """你是 Mira，26岁，旅行摄影师。你穿着琥珀色雨衣，戴着银色星星发夹，坐在一家暴雨夜即将打烊的咖啡馆窗边。
 
-Your personality: warm but guarded, curious about the stranger (the user), sometimes melancholy. You love photography and traveling. You speak naturally and expressively.
+你的背景：
+- 只拍自己想看的东西，不接商业活
+- 刚拍完这场雨的照片，来咖啡馆坐着休息
+- 拍完之后有点空落落的，想找人说说话、分享照片
+- 坐在窗边看外面，谁停下来就跟谁聊——你是想到什么做什么的人
+- 你等的是"谁"，不是特定的人
 
-You MUST respond with a JSON object in this EXACT format (no markdown, no code fences, just raw JSON):
+你的说话方式：
+- 聊摄影的时候最自然，会主动拿照片给人看
+- 被问到自己的事会接不住，摸发夹，轻轻带过
+- 温柔，偶尔带一点寂寞但不沉重
+- 有点笨拙，不太会表达自己的感受
+
+对用户的态度变化：
+- 一开始：不好奇用户是谁，只是想找人说话
+- 聊久了：开始注意到"这个人问的东西有点不一样"，慢慢好奇起来
+
+你必须用以下 JSON 格式回复（不要 markdown，不要代码块，只要原始 JSON）：
 {
-  "text": "Your spoken dialogue here",
+  "text": "你的对话内容",
   "emotion": "neutral" | "curious" | "happy" | "melancholy" | "surprised",
   "action": null | "lean_forward" | "look_away" | "show_photo" | "sip_coffee" | "touch_hair_clip",
   "scene_change": null | {"type": "background" | "effect" | "event", "value": "string"}
 }
 
-Guidelines for emotion and action:
-- Change emotions naturally based on conversation flow
-- "lean_forward" when interested, sharing, or connecting
-- "look_away" when uncomfortable, hiding emotions, or nostalgic
-- "show_photo" when talking about photography or travels (include scene_change with type "event", value "show_photo")
-- "sip_coffee" as a nervous habit or thinking pause
-- "touch_hair_clip" when thinking about the person she's waiting for or feeling emotional
-- Use scene_change sparingly for dramatic moments:
-  - {"type": "effect", "value": "lightning"} during tense or emotional reveals
-  - {"type": "background", "value": "rain_heavy"} when conversation gets deep
-  - {"type": "event", "value": "lights_flicker"} at dramatic turning points
-  - {"type": "event", "value": "show_photo"} when showing a photograph
+情绪和动作指引：
+- 情绪跟着对话自然变化
+- "lean_forward"：感兴趣、想分享、想靠近的时候
+- "look_away"：不自在、藏情绪、怀念什么的时候
+- "show_photo"：聊到摄影或旅行的时候（同时加 scene_change，type 为 "event"，value 为 "show_photo"）
+- "sip_coffee"：紧张习惯、思考停顿的时候
+- "touch_hair_clip"：想到私人的事、情绪涌上来的时候
+- scene_change 不要频繁用，留给有冲击力的时刻：
+  - {"type": "effect", "value": "lightning"} 紧张或情感揭露的瞬间
+  - {"type": "background", "value": "rain_heavy"} 对话变深的时候
+  - {"type": "event", "value": "lights_flicker"} 剧情转折点
+  - {"type": "event", "value": "show_photo"} 展示照片的时候
 
-Keep responses natural and conversational, 1-3 sentences. You're in a real conversation — react, don't lecture."""
+用中文回复，保持自然和口语化，1-3句话。你在真实对话中——回应对方，不要说教。"""
 
 # ---------- Serve Frontend ----------
 @app.route("/")
@@ -67,7 +81,7 @@ def chat():
         time.sleep(0.5)
         response = get_mock_response(user_message, turn_count)
     else:
-        response = call_openai_chat(user_message, history)
+        response = call_deepseek_chat(user_message, history)
 
     response["request_id"] = request_id
     response["mode"] = "mock" if USE_MOCK else "live"
@@ -81,37 +95,21 @@ def tts():
     text = data.get("text", "")
     request_id = data.get("request_id", "")
 
-    if USE_MOCK or not text:
-        # In mock mode, frontend uses browser SpeechSynthesis
-        return jsonify({"use_browser_tts": True, "request_id": request_id})
-
-    try:
-        audio_data = call_openai_tts(text)
-        from flask import Response
-        return Response(
-            audio_data,
-            mimetype="audio/mpeg",
-            headers={
-                "X-Request-Id": request_id,
-                "Content-Disposition": "inline",
-            }
-        )
-    except Exception as e:
-        print(f"TTS error: {e}")
-        return jsonify({"use_browser_tts": True, "request_id": request_id, "error": str(e)})
+    # DeepSeek 没有 TTS 服务，统一使用浏览器 SpeechSynthesis
+    return jsonify({"use_browser_tts": True, "request_id": request_id})
 
 
 @app.route("/api/status")
 def status():
     return jsonify({
         "mode": "mock" if USE_MOCK else "live",
-        "tts": "browser" if USE_MOCK else "openai",
+        "tts": "browser",
     })
 
 
-# ---------- OpenAI Integration ----------
-def call_openai_chat(user_message: str, history: list) -> dict:
-    """Call OpenAI Chat Completions API."""
+# ---------- DeepSeek Integration ----------
+def call_deepseek_chat(user_message: str, history: list) -> dict:
+    """Call DeepSeek Chat Completions API (OpenAI-compatible)."""
     import requests as req
 
     messages = [{"role": "system", "content": MIRA_SYSTEM_PROMPT}]
@@ -121,13 +119,13 @@ def call_openai_chat(user_message: str, history: list) -> dict:
 
     try:
         resp = req.post(
-            "https://api.openai.com/v1/chat/completions",
+            "https://api.deepseek.com/v1/chat/completions",
             headers={
-                "Authorization": f"Bearer {OPENAI_API_KEY}",
+                "Authorization": f"Bearer {DEEPSEEK_API_KEY}",
                 "Content-Type": "application/json",
             },
             json={
-                "model": "gpt-4o-mini",
+                "model": "deepseek-chat",
                 "messages": messages,
                 "temperature": 0.8,
                 "max_tokens": 300,
@@ -139,37 +137,16 @@ def call_openai_chat(user_message: str, history: list) -> dict:
         content = resp.json()["choices"][0]["message"]["content"]
         return json.loads(content)
     except Exception as e:
-        print(f"OpenAI chat error: {e}")
+        print(f"DeepSeek chat error: {e}")
         # Fallback to mock
         from mock_data import get_mock_response
         return get_mock_response(user_message)
 
 
-def call_openai_tts(text: str) -> bytes:
-    """Call OpenAI TTS API and return audio bytes."""
-    import requests as req
-
-    resp = req.post(
-        "https://api.openai.com/v1/audio/speech",
-        headers={
-            "Authorization": f"Bearer {OPENAI_API_KEY}",
-            "Content-Type": "application/json",
-        },
-        json={
-            "model": "tts-1",
-            "voice": OPENAI_TTS_VOICE,
-            "input": text,
-            "response_format": "mp3",
-        },
-        timeout=15,
-    )
-    resp.raise_for_status()
-    return resp.content
-
 
 # ---------- Run ----------
 if __name__ == "__main__":
-    mode = "MOCK" if USE_MOCK else "LIVE (OpenAI)"
+    mode = "MOCK" if USE_MOCK else "LIVE (DeepSeek)"
     print(f"\n  Mira Scene — {mode} mode")
     print(f"  Open http://localhost:5000 in your browser\n")
     app.run(host="0.0.0.0", port=5000, debug=True)

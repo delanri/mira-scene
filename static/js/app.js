@@ -91,6 +91,10 @@ const app = createApp({
 
       // Add user message to history
       chatHistory.value.push({ role: 'user', content: text });
+      // Keep history bounded to avoid unbounded memory growth
+      if (chatHistory.value.length > 40) {
+        chatHistory.value = chatHistory.value.slice(-40);
+      }
 
       // Set thinking state
       characterState.value = 'thinking';
@@ -109,6 +113,11 @@ const app = createApp({
           }),
         });
 
+        // 处理服务器错误
+        if (!resp.ok) {
+          throw new Error(`服务器返回 ${resp.status}`);
+        }
+
         const data = await resp.json();
 
         // Check if this response is stale (interrupted)
@@ -117,11 +126,14 @@ const app = createApp({
           return;
         }
 
+        // 防止 text 为空
+        const responseText = data.text || '……抱歉，我刚走神了。';
+
         // Update API mode
         apiMode.value = data.mode || 'mock';
 
         // Add assistant message to history
-        chatHistory.value.push({ role: 'assistant', content: data.text });
+        chatHistory.value.push({ role: 'assistant', content: responseText });
         turnCount++;
 
         // Apply scene changes
@@ -134,14 +146,14 @@ const app = createApp({
         applyAction(data.action);
 
         // Start subtitle typewriter (runs in background, non-blocking)
-        startSubtitle(data.text, requestId);
+        startSubtitle(responseText, requestId);
 
         // Set speaking state
         characterState.value = 'speaking';
         mouthState.value = 'speaking-mouth';
 
         // Play TTS audio (blocking — wait for it to finish)
-        await playTTS(data.text, requestId);
+        await playTTS(responseText, requestId);
 
         // Audio done — show full subtitle, then fade after delay
         if (currentRequestId === requestId) {
@@ -152,6 +164,14 @@ const app = createApp({
           isSubtitleFading.value = false;
           characterState.value = 'idle';
           mouthState.value = '';
+
+          // 说完话后情绪渐回 neutral（眼睛恢复原样）
+          setTimeout(() => {
+            if (currentRequestId === requestId && characterState.value === 'idle') {
+              currentEmotion.value = 'neutral';
+              mouthState.value = '';
+            }
+          }, 3500);
 
           // Start fade-out after 4 seconds
           subtitleFadeTimer = setTimeout(() => {
@@ -365,7 +385,7 @@ const app = createApp({
           const utterance = new SpeechSynthesisUtterance(text);
           utterance.rate = 0.9;
           utterance.pitch = 1.1;
-          utterance.lang = 'en-US';
+          utterance.lang = 'zh-CN';
           speechSynth = utterance;
 
           // Try to pick a female voice
@@ -432,7 +452,7 @@ const app = createApp({
       recognition = new SpeechRecognition();
       recognition.continuous = false;
       recognition.interimResults = true;
-      recognition.lang = 'en-US';
+      recognition.lang = 'zh-CN';
 
       recognition.onresult = (event) => {
         let transcript = '';
