@@ -274,3 +274,25 @@ test('举着相机时清动作：先进入放下阶段，1 秒后才清掉', asy
   await wait(1100);
   assert.equal(app.currentAction.value, '');
 });
+
+// ================================================================ 语音打断
+test('她说话（举着相机）时按住麦克风：停声、切到倾听，字幕不再继续，照片不再弹出', async () => {
+  const text = '要看吗？上个月在冰岛拍的——黑沙滩上的北极光。在海边冻了三个晚上才等到。';
+  const { app, ctl } = await loadApp({
+    fetch: reply({ text, action: 'show_photo', scene_change: { type: 'event', value: 'show_photo' }, photo: { job_id: 'j9', caption: '' } }),
+    photo: () => ({ status: 'done', url: '/generated/x.png' }),
+    speechSynthesis: true,
+  });
+  say(app, '你拍过什么');
+  await wait(400);
+  assert.equal(app.characterState.value, 'speaking');
+  const shown = app.displayedSubtitle.value;
+
+  app.startRecording(); // 她还在说，按住麦克风
+  assert.equal(app.characterState.value, 'listening');
+  await wait(3000);
+  assert.equal(app.characterState.value, 'listening', '旧回复没有把状态拉回去');
+  assert.ok(app.displayedSubtitle.value.length <= shown.length, '字幕没有继续打');
+  assert.equal(app.showPhoto.value, false, '还没给你看的照片不再弹出');
+  assert.ok(ctl.events.some((e) => e.type === 'interrupt'), '上报了一次打断');
+});
