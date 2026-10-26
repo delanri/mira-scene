@@ -10,25 +10,25 @@
   <div id="app">
     <div class="scene" :class="[`bg-${sceneBackground}`, { 'lightning-flash': isLightning }]">
 
-      <!-- ===== Layer 1: Shop Interior (z:5) ===== -->
+      <!-- ===== 第 1 层：店内（z:5） ===== -->
       <div class="shop-interior">
-        <!-- Pendant lamp silhouette -->
+        <!-- 吊灯剪影 -->
         <div class="pendant-lamp">
           <div class="lamp-cord"></div>
           <div class="lamp-shade"></div>
         </div>
         <div class="ambient-light" :class="{ flicker: isFlickering }"></div>
-        <!-- Subtle interior hints -->
+        <!-- 墙上的架子、画框 -->
         <div class="interior-detail shelf-l"></div>
         <div class="interior-detail shelf-r"></div>
         <div class="interior-detail frame-l"></div>
       </div>
 
-      <!-- ===== Layer 2: Character + Table (z:10) ===== -->
+      <!-- ===== 第 2 层：角色 + 桌子（z:10） ===== -->
       <div class="character-area">
         <div class="character-container" :class="[currentEmotion, currentAction, characterState]">
 
-          <!-- Mira — Inline SVG Character -->
+          <!-- Mira（内联 SVG）：情绪、动作、状态是外层容器的 class，style.css 决定怎么动 -->
           <svg class="mira-svg" viewBox="0 0 200 300" xmlns="http://www.w3.org/2000/svg">
             <defs>
               <linearGradient id="rc-grad" x1="0" y1="0" x2="0" y2="1">
@@ -60,39 +60,39 @@
               </filter>
             </defs>
 
-            <!-- Hair back — 妹妹头 (bob cut) -->
+            <!-- 后面的头发（妹妹头） -->
             <ellipse cx="100" cy="85" rx="62" ry="58" fill="url(#hair-g)"/>
 
-            <!-- Left side hair (bob到下巴，发尾内扣) -->
+            <!-- 左侧头发（到下巴，发尾内扣） -->
             <path d="M44,62 C36,80 34,108 36,132 Q38,148 52,144 Q60,140 57,128 C56,112 55,90 57,75Z" fill="url(#hair-g)"/>
 
-            <!-- Right side hair (bob到下巴，发尾内扣) -->
+            <!-- 右侧头发（到下巴，发尾内扣） -->
             <path d="M156,62 C164,80 166,108 164,132 Q162,148 148,144 Q140,140 143,128 C144,112 145,90 143,75Z" fill="url(#hair-g)"/>
 
-            <!-- Neck -->
+            <!-- 脖子 -->
             <rect x="90" y="138" width="20" height="20" rx="5" fill="#e8c8a8"/>
 
-            <!-- Face -->
+            <!-- 脸 -->
             <ellipse cx="100" cy="100" rx="44" ry="50" fill="url(#skin-g)"/>
 
-            <!-- Cheek blush -->
+            <!-- 腮红（害羞时变红） -->
             <ellipse class="cheek" cx="72" cy="116" rx="10" ry="6" fill="#e8a090" opacity="0.25"/>
             <ellipse class="cheek" cx="128" cy="116" rx="10" ry="6" fill="#e8a090" opacity="0.25"/>
 
-            <!-- Side hair front wisps (脸前侧发丝) -->
+            <!-- 脸前侧的发丝 -->
             <path d="M54,88 C50,104 48,122 50,138" stroke="#1a1a2e" stroke-width="7" fill="none" stroke-linecap="round" opacity="0.45"/>
             <path d="M146,88 C150,104 152,122 150,138" stroke="#1a1a2e" stroke-width="7" fill="none" stroke-linecap="round" opacity="0.45"/>
 
-            <!-- Bangs — 齐刘海 -->
+            <!-- 齐刘海 -->
             <path d="M42,72 C42,26 158,26 158,72 L156,94 Q130,89 100,91 Q70,89 44,94Z" fill="url(#hair-g)"/>
 
-            <!-- Bangs bottom strand detail -->
+            <!-- 刘海下沿的发丝 -->
             <path d="M50,92 Q75,86 100,89 Q125,86 150,92" stroke="#22223a" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.25"/>
 
-            <!-- Hair highlight shimmer -->
+            <!-- 头发高光 -->
             <path d="M58,46 Q100,32 142,46" stroke="rgba(80,80,120,0.18)" stroke-width="6" fill="none" stroke-linecap="round"/>
 
-            <!-- Eyes (group for blink) -->
+            <!-- 眼睛（整组加 blink class 就闭眼） -->
             <g :class="{ blink: isBlinking }">
               <ellipse class="eye-shape eye-l" cx="82" cy="105" rx="5.5" ry="6.5" fill="#1a1a2e"/>
               <circle class="eye-hl" cx="84" cy="103" r="2.2" fill="white" opacity="0.85"/>
@@ -100,26 +100,26 @@
               <circle class="eye-hl" cx="120" cy="103" r="2.2" fill="white" opacity="0.85"/>
             </g>
 
-            <!-- Mouth variants (switched by mouthState) -->
+            <!-- 嘴型（按 mouthState 切换） -->
             <path v-show="mouthState === ''" d="M93,128 Q100,134 107,128" fill="#c48a70"/>
             <path v-show="mouthState === 'smile'" d="M88,126 Q100,138 112,126" fill="#c48a70"/>
             <line v-show="mouthState === 'slight'" x1="93" y1="130" x2="107" y2="130" stroke="#c48a70" stroke-width="2" stroke-linecap="round"/>
             <ellipse v-show="mouthState === 'open'" cx="100" cy="130" rx="6" ry="7" fill="#c48a70"/>
             <ellipse v-show="mouthState === 'speaking-mouth'" class="mouth-anim" cx="100" cy="130" rx="5.5" ry="5" fill="#c48a70"/>
 
-            <!-- Hair clip (silver star with glow) -->
+            <!-- 发夹（银色星星，带一点光晕） -->
             <g class="clip-g" filter="url(#clip-glow)">
               <text x="146" y="88" font-size="13" fill="#c0c8d8" font-family="sans-serif">✦</text>
             </g>
 
-            <!-- Body (raincoat — smooth trapezoid) -->
+            <!-- 身体（琥珀色雨衣） -->
             <path d="M70,155 C74,148 126,148 130,155 L140,285 Q100,292 60,285Z" fill="url(#rc-grad)"/>
 
-            <!-- Collar detail -->
+            <!-- 领口 -->
             <path d="M84,155 Q100,163 116,155" fill="none" stroke="#9a7e35" stroke-width="3" stroke-linecap="round"/>
             <rect x="92" y="151" width="16" height="9" rx="2" fill="url(#collar-grad)"/>
 
-            <!-- Camera（放在大衣之后、双手之前：拿起来时在身体前面、在手后面） -->
+            <!-- 相机（放在大衣之后、双手之前：拿起来时在身体前面、在手后面） -->
             <g class="camera-g">
               <rect x="94.5" y="267" width="9" height="4.5" rx="1.5" fill="#3a3a42"/>
               <rect x="90" y="271" width="20" height="13" rx="2" fill="#3a3a42"/>
@@ -127,19 +127,19 @@
               <circle cx="100" cy="277.5" r="3.6" fill="url(#lens-g)" stroke="#555" stroke-width="0.9"/>
             </g>
 
-            <!-- Hands -->
+            <!-- 手 -->
             <circle class="hand-l" cx="56" cy="275" r="12" fill="url(#skin-g)"/>
             <circle class="hand-r" cx="144" cy="275" r="12" fill="url(#skin-g)"/>
           </svg>
 
-          <!-- Cafe table -->
+          <!-- 桌子（HTML，叠在 SVG 上面；相机在 SVG 里） -->
           <div class="cafe-table">
             <div class="coffee-cup">
               <div class="steam"></div>
             </div>
           </div>
 
-          <!-- Emotion particles -->
+          <!-- 情绪小粒子 -->
           <div class="emotion-particles" v-if="showParticles">
             <span v-for="n in 5" :key="n" class="particle"
                   :style="{ animationDelay: `${n * 0.15}s` }">
@@ -148,7 +148,7 @@
           </div>
         </div>
 
-        <!-- Photo overlay (polaroid) -->
+        <!-- 照片（拍立得），点一下关掉 -->
         <div class="photo-overlay" v-if="showPhoto" @click="closePhoto">
           <div class="polaroid">
             <div class="photo-image">
@@ -163,7 +163,7 @@
               <div v-else class="aurora-scene">
                 <div class="aurora"></div>
                 <div class="mountains"></div>
-                <!-- 位置在打开照片时算好一次（app.js openPhoto），模板里不再现算随机数：
+                <!-- 位置在打开照片时算好一次（photo.js 的 openPhoto），不在模板里现算随机数：
                      否则页面每次重新渲染（字幕出一个字、眨眼）星星都会跳位置、闪烁重来 -->
                 <div class="stars" v-for="s in photoStars" :key="s.id"
                      :style="{ left: `${s.left}%`, top: `${s.top}%`, animationDelay: `${s.delay}s` }"
@@ -176,7 +176,7 @@
         </div>
       </div>
 
-      <!-- ===== Layer 3: Glass Window (z:15) ===== -->
+      <!-- ===== 第 3 层：玻璃（z:15） ===== -->
       <div class="glass-layer" v-once>
         <div class="glass-drop" v-for="n in 20" :key="'drop-'+n"
              :style="{
@@ -192,17 +192,17 @@
         <div class="condensation"></div>
       </div>
 
-      <!-- ===== Window Frame (z:18) ===== -->
+      <!-- ===== 窗框（z:18） ===== -->
       <div class="window-frame"></div>
 
-      <!-- ===== Layer 4: Rain (z:22) ===== -->
+      <!-- ===== 第 4 层：雨（z:22） ===== -->
       <div class="rain-container" :class="{ heavy: sceneBackground === 'rain_heavy' }">
         <div class="rain-drop" v-for="n in 12" :key="n"
              :style="{ left: `${Math.random()*100}%`, animationDelay: `${Math.random()*4}s`, animationDuration: `${1.6 + Math.random()*1.2}s` }">
         </div>
       </div>
 
-      <!-- ===== UI Layer (z:30+) ===== -->
+      <!-- ===== 界面（z:30+） ===== -->
       <div class="status-badge" :class="characterState">
         <span class="status-dot"></span>
         <span class="status-text">{{ statusText }}</span>

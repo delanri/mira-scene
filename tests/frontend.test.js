@@ -1,5 +1,5 @@
 /**
- * 前端测试：在 Node 里跑真实的 static/js/app.js（见 helpers/load_app.js）。
+ * 前端测试：在 Node 里跑真实的前端模块 static/js/*.js（怎么跑起来的见 helpers/load_app.js）。
  *
  * 运行（在项目根目录）：node --test
  * 需要 Node 18+，不需要安装任何依赖。
@@ -12,7 +12,7 @@ const FAIL_NETWORK = '……雨声太大了，刚才没听清。你再说一遍�
 const FAIL_TIMEOUT = '……抱歉，刚刚走神了。你能再说一遍吗？';
 const NO_SPEECH = '……嗯？你刚刚说什么了吗？';
 
-// 失败测试里 app.js 会 console.error，测试输出里不需要看到
+// 失败场景里前端会 console.error，测试输出里不需要看到
 test.beforeEach(() => { test.mock.method(console, 'error', async () => {}); });
 
 // ================================================================ 请求失败
@@ -164,7 +164,7 @@ test('浏览器报念到哪个词，字幕就跟到哪', async () => {
   const text = '刚拍完照回来，在这儿歇一会儿。';
   const { app, ctl } = await loadApp({ fetch: reply({ text }), speechSynthesis: true });
   say(app, '你在干嘛');
-  await wait(150); // 等语音开始（app.js 里 cancel 后延迟 100ms 才 speak）
+  await wait(150); // 等语音开始（speech.js 里 cancel 后延迟 100ms 才 speak）
   const u = ctl.utterances.at(-1);
   assert.ok(u, '应该已经开始念了');
   u.onstart();

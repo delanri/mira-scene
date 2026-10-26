@@ -16,6 +16,6 @@
     "noImplicitReturns": true,
     "skipLibCheck": true
   },
-  "include": ["static/js/*.js", "static/js/vue.global.prod.js"],
+  "include": ["static/js/*.js"],
   "exclude": ["static/js/vue.global.prod.js"]
 }

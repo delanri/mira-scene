@@ -1,30 +1,31 @@
 /* ========================================
-   Mira Scene — Through the Glass
-   Rainy night, looking in from outside
-   Layout: 0-20% sky | 20-58% character | 58-60% gap | 63-80% subtitle | 85-100% input
+   Mira Scene — 透过玻璃窗看雨夜咖啡馆
+   画面从里到外分层：店内（z 5）→ 角色和桌子（z 10）→ 玻璃（z 15）→ 窗框（z 18）→ 雨（z 22）→ 界面（z 30+）
+   竖向布局：0–20% 夜空 | 20–58% 角色 | 63–80% 字幕 | 85–100% 输入框
+   角色的情绪、动作、状态都是加在 .character-container 上的 class，这里决定每个 class 下怎么动
    ======================================== */
 
-/* === Reset & Base === */
+/* === 基础 === */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 :root {
-  /* Night outside — blue rain tone */
+  /* 窗外的夜：偏蓝的雨夜 */
   --night-dark: #0b1222;
   --night-mid: #142038;
-  /* Warm interior light leaking through glass — boosted */
+  /* 店里透出来的暖光 */
   --glow-warm: rgba(205, 150, 60, 0.40);
   --glow-center: rgba(235, 190, 95, 0.32);
-  /* Glass */
+  /* 玻璃 */
   --glass-tint: rgba(160, 185, 210, 0.06);
   --glass-edge-fog: rgba(180, 200, 220, 0.25);
-  /* Rain */
+  /* 雨 */
   --rain-color: rgba(174, 200, 235, 0.55);
-  /* Interior warm palette */
+  /* 店内暖色 */
   --interior-bg: #2a1f14;
   --interior-glow: rgba(215, 165, 70, 0.55);
   --table-color: #3d2b18;
   --table-highlight: #5a3f25;
-  /* Character */
+  /* 角色 */
   --skin: #f0d5b8;
   --skin-shadow: #d4b494;
   --hair-dark: #1a1a2e;
@@ -35,12 +36,12 @@
   --clip-color: #e8c84c;
   --eye-color: #2d2d4a;
   --mouth-color: #c48a70;
-  /* Coffee */
+  /* 咖啡 */
   --cup-body: #f5f0e8;
   --cup-shadow: #d4c8b0;
   --coffee-liquid: #3a2510;
   --steam-color: rgba(255, 255, 255, 0.25);
-  /* UI */
+  /* 界面 */
   --text-primary: rgba(255, 255, 255, 0.92);
   --text-secondary: rgba(255, 255, 255, 0.6);
   --input-bg: rgba(20, 20, 30, 0.75);
@@ -60,23 +61,23 @@ html, body {
 
 #app { height: 100%; }
 
-/* === Scene (fullscreen) === */
+/* === 场景（全屏） === */
 .scene {
   position: fixed;
   inset: 0;
   background:
-    /* warm glow leaking from window */
+    /* 窗户里透出来的暖光 */
     radial-gradient(ellipse 60% 45% at 50% 38%,
       var(--glow-center) 0%,
       var(--glow-warm) 25%,
       rgba(180, 130, 50, 0.12) 45%,
       transparent 65%),
-    /* wet pavement reflection at bottom */
+    /* 底部湿地面的反光 */
     radial-gradient(ellipse 90% 25% at 50% 98%,
       rgba(60, 85, 130, 0.18) 0%,
       rgba(40, 60, 100, 0.08) 50%,
       transparent 100%),
-    /* subtle wall texture — faint horizontal lines */
+    /* 墙面纹理：很淡的横线 */
     repeating-linear-gradient(
       0deg,
       transparent,
@@ -84,7 +85,7 @@ html, body {
       rgba(140, 160, 190, 0.018) 28px,
       rgba(140, 160, 190, 0.018) 29px
     ),
-    /* subtle vertical variation */
+    /* 墙面纹理：很淡的竖线 */
     repeating-linear-gradient(
       90deg,
       transparent,
@@ -92,11 +93,11 @@ html, body {
       rgba(120, 140, 170, 0.012) 45px,
       rgba(120, 140, 170, 0.012) 46px
     ),
-    /* sky glow at top */
+    /* 顶部天空的微光 */
     radial-gradient(ellipse 70% 20% at 50% 0%,
       rgba(50, 70, 110, 0.15) 0%,
       transparent 100%),
-    /* base night gradient */
+    /* 夜色底色 */
     linear-gradient(175deg, #0e1530 0%, var(--night-dark) 30%, #0c1428 55%, #0f1832 80%, #0a1020 100%);
   overflow: hidden;
   display: flex;
@@ -105,7 +106,7 @@ html, body {
   justify-content: flex-end;
 }
 
-/* Vignette — dark edges like a window frame */
+/* 四周压暗，像从窗外往里看 */
 .scene::before {
   content: '';
   position: absolute;
@@ -119,7 +120,7 @@ html, body {
       rgba(6, 12, 28, 0.75) 100%);
 }
 
-/* Lightning flash */
+/* 闪电：整个画面亮一下 */
 .scene.lightning-flash::after {
   content: '';
   position: absolute;
@@ -137,7 +138,7 @@ html, body {
   100% { opacity: 0; }
 }
 
-/* === Shop Interior (behind glass, z-index 5) === */
+/* === 店内（玻璃后面，z-index 5） === */
 .shop-interior {
   position: absolute;
   top: 12%;
@@ -155,7 +156,7 @@ html, body {
   pointer-events: none;
 }
 
-/* --- Pendant lamp silhouette --- */
+/* --- 吊灯剪影 --- */
 .pendant-lamp {
   position: absolute;
   top: 0;
@@ -180,7 +181,7 @@ html, body {
   box-shadow: 0 8px 28px rgba(215, 170, 70, 0.25), 0 3px 12px rgba(235, 195, 105, 0.15);
 }
 
-/* --- Interior detail silhouettes --- */
+/* --- 墙上的架子、画框剪影 --- */
 .interior-detail {
   position: absolute;
   pointer-events: none;
@@ -214,7 +215,7 @@ html, body {
   border-radius: 1px;
 }
 
-/* --- Ambient light (BOOSTED: center 0.20 → 0.30) --- */
+/* --- 店里的环境光：平时缓慢呼吸，灯光闪烁事件时快速明灭 --- */
 .ambient-light {
   position: absolute;
   top: 5%;
@@ -253,7 +254,7 @@ html, body {
   100% { opacity: 1; }
 }
 
-/* === Character Area (inside shop, z-index 10) === */
+/* === 角色区域（店内，z-index 10） === */
 .character-area {
   position: absolute;
   top: 20%;
@@ -277,13 +278,13 @@ html, body {
   transition: transform 0.4s ease;
 }
 
-/* === SVG Character (Mira) === */
+/* === Mira（内联 SVG） === */
 .mira-svg {
   width: 220px;
   display: block;
 }
 
-/* --- Eye blink via SVG attribute transition --- */
+/* --- 眨眼：直接过渡 SVG 的 rx / ry 属性 --- */
 .blink .eye-shape {
   ry: 1.5 !important;
   rx: 5.5 !important;
@@ -305,7 +306,7 @@ html, body {
   transition: opacity 0.1s ease 0.12s;
 }
 
-/* --- Mouth animation (speaking) --- */
+/* --- 说话时嘴巴一张一合 --- */
 .mouth-anim {
   animation: svg-mouth 0.3s ease-in-out infinite alternate;
 }
@@ -315,16 +316,12 @@ html, body {
   100% { ry: 7; rx: 6; }
 }
 
-/* --- Hair clip glow --- */
-.clip-g {
-  transition: transform 0.3s ease, opacity 0.3s ease;
-}
-
-/* --- Hand transitions for actions --- */
+/* --- 手：动作切换都平滑过渡 --- */
 .hand-l, .hand-r {
   transition: transform 0.5s ease;
 }
 
+/* --- 发夹 --- */
 .clip-g {
   transition: transform 0.4s ease, opacity 0.3s ease;
   /* origin 必须写在基础状态上：放手时 class 移除，origin 若跟着变回 0 0，
@@ -332,12 +329,12 @@ html, body {
   transform-origin: 152px 83px;
 }
 
-/* Action: touch hair clip — right hand reaches up to clip */
+/* touch_hair_clip（想到私人的事）：右手伸到发夹上 */
 .character-container.touch_hair_clip .hand-r {
   transform: translate(4px, -180px);
 }
 
-/* 摸发夹时星星闪一下 */
+/* 摸发夹时星星放大，闪三下 */
 .character-container.touch_hair_clip .clip-g {
   transform: scale(1.3);
   animation: clip-sparkle 0.5s ease-in-out 3;
@@ -348,10 +345,10 @@ html, body {
   50% { opacity: 0.4; }
 }
 
-/* show_photo（聊摄影）: 左手拿起相机举到胸口 */
-/* 相机在 SVG 里（index.html .camera-g），和手同一个坐标系，任何屏幕宽度都对得上。
+/* show_photo（聊摄影、旅行）：左手先握住桌上的相机，再举到胸口 */
+/* 相机画在 SVG 里（index.html .camera-g），和手在同一个坐标系，任何屏幕宽度都对得上。
    握点 = 相机左上角 (87, 270)：手心落在这里，相机也绕这里转，转的时候不会脱手。
-   origin 写在基础状态上，放下时不会跳（发夹那个坑）。 */
+   transform-origin 写在基础状态上：动作结束、class 移除时中心点不变，放下时才不会跳。 */
 .camera-g {
   transform-origin: 87px 270px;
   transition: transform 0.5s ease;
@@ -382,7 +379,7 @@ html, body {
   100% { transform: translate(7px, -55px) rotate(-8deg); }
 }
 
-/* put_down_camera（app.js clearAction 切进来，1s 后清掉）：
+/* put_down_camera（character.js 的 clearAction 切进来，1 秒后清掉）：
    0–50% 手和相机一起放回桌上 → 50–60% 松手停一下 → 60–100% 手收回（相机不动） */
 .character-container.put_down_camera .hand-l {
   animation: hand-put-down-camera 1s ease-in-out;
@@ -405,13 +402,12 @@ html, body {
   100% { transform: translate(0, 0) rotate(0deg); }
 }
 
-/* hand_to_mouth（打招呼 / 被问在等谁）: 左手抬到嘴边，犹豫、局促、话到嘴边又咽回去
-   位置沿用旧版 touch_hair_clip 的左手 translate(30px, -130px) */
+/* hand_to_mouth（打招呼 / 被问在等谁）：左手抬到下巴旁边——犹豫、局促、话到嘴边又咽回去 */
 .character-container.hand_to_mouth .hand-l {
   transform: translate(30px, -130px);
 }
 
-/* look_away（被夸）: 双手捂嘴 */
+/* look_away（被夸、不自在）：双手捂嘴 */
 .character-container.look_away .hand-l {
   transform: translate(30px, -130px);
 }
@@ -419,7 +415,7 @@ html, body {
   transform: translate(-30px, -130px);
 }
 
-/* lean_forward（聊天气/雨）: 眨眨眼笑着说话 */
+/* lean_forward（感兴趣、想靠近）：眨眨眼笑着说话 */
 .character-container.lean_forward .eye-shape {
   animation: smile-blink 1.5s ease-in-out;
 }
@@ -432,7 +428,7 @@ html, body {
   80% { ry: 5; }
 }
 
-/* sip_coffee（聊咖啡）: 右手拿着杯把，手和杯子一起晃 */
+/* sip_coffee（聊咖啡、思考停顿）：右手拿着杯把，手和杯子一起晃 */
 .character-container.sip_coffee .hand-r {
   transform: translate(44px, -3px);
   animation: hand-coffee-sway 2.5s ease-in-out;
@@ -449,7 +445,7 @@ html, body {
   100% { transform: translate(44px, -3px); }
 }
 
-/* === Cafe Table === */
+/* === 桌子 === */
 .cafe-table {
   position: relative;
   width: 240px;
@@ -473,7 +469,7 @@ html, body {
   background: rgba(255, 255, 255, 0.06);
 }
 
-/* --- Coffee Cup on table --- */
+/* --- 桌上的咖啡杯 --- */
 .coffee-cup {
   position: absolute;
   right: 28px;
@@ -570,9 +566,7 @@ html, body {
   100% { transform: translateY(0) rotate(0); }
 }
 
-/* === Camera：已移进 SVG（见 index.html .camera-g 和上面 show_photo 部分） === */
-
-/* === Emotion Particles === */
+/* === 情绪小粒子（切表情时头顶冒出 ✨ ? ! ♡ 之类） === */
 .emotion-particles {
   position: absolute;
   top: -10px;
@@ -601,8 +595,8 @@ html, body {
 .particle:nth-child(4) { --px: 24px; }
 .particle:nth-child(5) { --px: 0px; }
 
-/* === Character States === */
-/* Thinking — slight sway */
+/* === 角色状态 === */
+/* 思考：轻轻左右摇 */
 .character-container.thinking {
   animation: think-sway 3s ease-in-out infinite;
 }
@@ -613,12 +607,12 @@ html, body {
   75% { transform: rotate(1deg); }
 }
 
-/* Listening — lean forward slightly */
+/* 倾听：微微往前 */
 .character-container.listening {
   transform: translateY(-3px);
 }
 
-/* Speaking — subtle movement */
+/* 说话：轻轻上下起伏 */
 .character-container.speaking {
   animation: speak-bob 2s ease-in-out infinite;
 }
@@ -628,7 +622,7 @@ html, body {
   50% { transform: translateY(-2px); }
 }
 
-/* === Emotion States (targeting SVG elements) === */
+/* === 情绪（作用在眼睛、嘴、发夹、腮红上，不动整个人） === */
 .character-container.happy {
   /* 情绪通过 SVG 内部元素（嘴巴、发夹）表达，不旋转整个容器 */
 }
@@ -639,7 +633,7 @@ html, body {
 .character-container.melancholy {
   /* 情绪通过眼睛半闭表达，不位移整个容器 */
 }
-/* shy（害羞）: 脸颊慢慢变红 */
+/* shy（害羞）：脸颊慢慢变红 */
 .cheek {
   transition: opacity 0.8s ease, fill 0.8s ease;
 }
@@ -666,7 +660,7 @@ html, body {
   ry: 7.5;
 }
 
-/* === Glass Layer (z-index 15) — clipped to window frame area === */
+/* === 玻璃（z-index 15，只在窗框范围内） === */
 .glass-layer {
   position: absolute;
   top: 12%;
@@ -679,7 +673,7 @@ html, body {
   overflow: hidden;
 }
 
-/* Glass surface — subtle reflection + blur to feel like looking through glass */
+/* 玻璃表面：淡淡的反光 + 一点模糊，像隔着玻璃看 */
 .glass-layer::after {
   content: '';
   position: absolute;
@@ -694,7 +688,7 @@ html, body {
   -webkit-backdrop-filter: blur(0.5px);
 }
 
-/* Condensation — REBALANCED: wider clear center, warmer tint, lower outer opacity */
+/* 水汽：中间清楚，越往边上越雾 */
 .condensation {
   position: absolute;
   inset: 0;
@@ -706,7 +700,7 @@ html, body {
       rgba(160, 175, 185, 0.16) 100%);
 }
 
-/* Corner fog — REDUCED from 0.16-0.22 to 0.10-0.14 */
+/* 四个角的雾 */
 .condensation::before {
   content: '';
   position: absolute;
@@ -718,7 +712,7 @@ html, body {
     radial-gradient(circle at 95% 85%, rgba(180, 195, 210, 0.10) 0%, transparent 18%);
 }
 
-/* Water drops on glass — realistic refraction 💧 */
+/* 玻璃上的水珠 */
 .glass-drop {
   position: absolute;
   top: -3%;
@@ -736,7 +730,7 @@ html, body {
   animation: drop-fall var(--drop-dur, 22s) linear infinite;
 }
 
-/* Highlight spot — top-left glint */
+/* 水珠左上角的高光 */
 .glass-drop::before {
   content: '';
   position: absolute;
@@ -767,7 +761,7 @@ html, body {
     transparent 100%);
 }
 
-/* Water trail — every drop leaves a faint streak behind it */
+/* 水痕：每颗水珠身后拖一道很淡的痕迹 */
 .glass-drop::after {
   content: '';
   position: absolute;
@@ -783,7 +777,7 @@ html, body {
   border-radius: 0 0 1px 1px;
 }
 
-/* Dripping drops override the trail with a longer, more visible one */
+/* 往下淌的水珠：水痕更长、更明显 */
 .glass-drop.dripping::after {
   bottom: auto;
   top: auto;
@@ -796,7 +790,7 @@ html, body {
     rgba(220, 230, 240, 0.12) 100%);
 }
 
-/* Slow fall — 30-50s per drop */
+/* 慢慢滑落：一颗要滑半分钟到一分钟 */
 @keyframes drop-fall {
   0% { transform: translateY(0); opacity: 0; }
   2% { opacity: 0.5; }
@@ -804,7 +798,7 @@ html, body {
   100% { transform: translateY(550px); opacity: 0; }
 }
 
-/* === Window Frame (z-index 18) === */
+/* === 窗框（z-index 18） === */
 .window-frame {
   position: absolute;
   top: 12%;
@@ -822,7 +816,7 @@ html, body {
     0 0 40px rgba(0, 0, 0, 0.25);
 }
 
-/* Wood grain hint */
+/* 木纹 */
 .window-frame::before {
   content: '';
   position: absolute;
@@ -839,7 +833,7 @@ html, body {
   pointer-events: none;
 }
 
-/* === Rain (our side, z-index 22) === */
+/* === 雨（玻璃外、我们这一侧，z-index 22） === */
 .rain-container {
   position: absolute;
   inset: 0;
@@ -875,7 +869,7 @@ html, body {
   100% { transform: translateY(105vh); opacity: 0; }
 }
 
-/* Background variants */
+/* 背景变化（scene_change: background） */
 .scene.bg-rain_heavy .shop-interior {
   opacity: 0.85;
 }
@@ -888,7 +882,7 @@ html, body {
       transparent 100%);
 }
 
-/* === Photo Overlay === */
+/* === 照片（拍立得） === */
 .photo-overlay {
   position: fixed;
   inset: 0;
@@ -978,7 +972,7 @@ html, body {
   animation: twinkle 3s ease-in-out infinite;
 }
 
-/* 3 秒一个周期：亮起 → 暗到完全看不见 → 在看不见的那一刻换位置（app.js moveStar）→ 再亮起 */
+/* 3 秒一个周期：亮起 → 暗到完全看不见 → 在看不见的那一刻换位置（photo.js 的 moveStar）→ 再亮起 */
 @keyframes twinkle {
   0%, 100% { opacity: 0; }
   50% { opacity: 1; }
@@ -1046,7 +1040,7 @@ html, body {
   line-height: 1.4;
 }
 
-/* === Status Badge (our side, z-index 30) === */
+/* === 状态栏（z-index 30） === */
 .status-badge {
   position: absolute;
   top: 24px;
@@ -1066,7 +1060,7 @@ html, body {
   color: var(--text-secondary);
   letter-spacing: 0.5px;
   transition: all 0.3s ease;
-  white-space: nowrap; /* left:50% 定位最多只有半屏宽，加了好感度后手机上会折行 */
+  white-space: nowrap; /* 状态栏用 left:50% 定位，最宽只有半屏，内容一多手机上会折行 */
 }
 
 .status-dot {
@@ -1103,7 +1097,7 @@ html, body {
   50% { opacity: 0.5; transform: scale(0.7); }
 }
 
-/* === Subtitle Area (z-index 30) === */
+/* === 字幕（z-index 30） === */
 .subtitle-area {
   position: absolute;
   top: 66%;
@@ -1154,7 +1148,7 @@ html, body {
   50% { opacity: 0; }
 }
 
-/* --- Subtitle rain-wash fade out --- */
+/* --- 字幕淡出：像被雨水冲掉 --- */
 .subtitle-box.rain-fade {
   animation: rain-wash-out 1.5s ease-in forwards;
 }
@@ -1190,7 +1184,7 @@ html, body {
   }
 }
 
-/* === Input Area (our side, z-index 30) === */
+/* === 输入区（z-index 30） === */
 .input-area {
   position: absolute;
   bottom: 0;
@@ -1381,7 +1375,7 @@ html, body {
   animation: fade-in 0.3s ease;
 }
 
-/* === Responsive === */
+/* === 手机适配 === */
 @media (max-width: 480px) {
   .shop-interior {
     width: 340px;
@@ -1449,7 +1443,7 @@ html, body {
   }
 }
 
-/* === Dark scrollbar === */
+/* === 深色滚动条 === */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 2px; }

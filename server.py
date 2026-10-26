@@ -1,4 +1,4 @@
-"""Mira Scene — Interactive character experience server."""
+"""Mira Scene 后端：对话（DeepSeek / 演示模式）、照片生成任务、观测页。"""
 
 import json
 import mimetypes
@@ -21,7 +21,7 @@ import store  # noqa: E402
 
 app = Flask(__name__, static_folder="static", static_url_path="")
 
-# ---------- Config ----------
+# ---------- 配置 ----------
 DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY", "")
 FORCE_MOCK = os.getenv("FORCE_MOCK", "false").lower() == "true"
 USE_MOCK = FORCE_MOCK or not DEEPSEEK_API_KEY
@@ -76,13 +76,13 @@ text 是你说的话，必填，不能为空，1-3 句话。样例：
 
 用中文回复，保持自然和口语化，1-3句话。你在真实对话中——回应对方，不要说教。"""
 
-# ---------- Serve Frontend ----------
+# ---------- 页面 ----------
 @app.route("/")
 def index():
     return send_from_directory("static", "index.html")
 
 
-# ---------- API Routes ----------
+# ---------- 接口 ----------
 @app.route("/api/chat", methods=["POST"])
 def chat():
     data = request.json
@@ -99,7 +99,7 @@ def chat():
     info = {"attempts": 0, "error": None}
     if USE_MOCK:
         from mock_data import get_mock_response
-        # Small delay to simulate network latency
+        # 演示模式也停 0.5 秒，模拟真实的网络延迟，让「等她想一下」看得见
         time.sleep(0.5)
         response = get_mock_response(user_message, turn_count, affinity)
     else:
@@ -179,7 +179,7 @@ def bind_photo_action(response: dict) -> None:
 
 @app.route("/api/tts", methods=["POST"])
 def tts():
-    """Generate TTS audio. Returns audio bytes or empty response for browser TTS fallback."""
+    """语音：现在统一让前端用浏览器语音合成。以后接云端 TTS，在这里返回音频即可，前端已经支持播放音频。"""
     data = request.json
     text = data.get("text", "")
     request_id = data.get("request_id", "")
@@ -311,9 +311,9 @@ img{{height:48px;border-radius:3px}}
     return html
 
 
-# ---------- DeepSeek Integration ----------
+# ---------- DeepSeek ----------
 def call_deepseek_chat(user_message: str, history: list, current_round: int, affinity: int) -> tuple:
-    """Call DeepSeek Chat Completions API (OpenAI-compatible).
+    """调用 DeepSeek（OpenAI 兼容接口），要求只返回 JSON。
 
     返回 (response, fell_back, info)。fell_back=True 表示 DeepSeek 出错/超时/返回坏 JSON，
     这一轮换成了演示回复；info = {attempts: 调了几次, error: 最后一次的错误}（给观测页用）。
@@ -406,7 +406,7 @@ def assistant_turn_json(h: dict) -> str:
 
 
 
-# ---------- Run ----------
+# ---------- 启动 ----------
 if __name__ == "__main__":
     mode = "MOCK" if USE_MOCK else "LIVE (DeepSeek)"
     print(f"\n  Mira Scene — {mode} mode · 生图：{imagegen.provider_name()}")

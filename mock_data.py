@@ -1,10 +1,11 @@
-"""Mock response data for demo mode (no API key needed)."""
+"""演示模式（不需要任何 API key）：按关键词挑预设回复。"""
 
 import random
 import re
 
-# Conversation flow: each entry matches keyword patterns
-# Falls through to default if no match
+# 每一条：keywords 关键词；priority 优先级（话题 3 > 情绪/夸奖 2 > 招呼/泛问 1）；
+# responses 回复，可以用 min_affinity 标「好感度到第几阶段才会说」。
+# 都没命中时，按轮数轮流用 DEFAULT_RESPONSES。
 MOCK_RESPONSES = [
     {
         "keywords": ["hello", "hi", "hey", "你好", "嗨", "在吗", "晚上好"],
@@ -227,14 +228,14 @@ DEFAULT_RESPONSES = [
 
 
 def _keyword_hit(keyword: str, message_lower: str) -> bool:
-    """英文关键词按整个单词匹配（"this" 里的 "hi" 不算），中文照旧按包含匹配。"""
+    """英文关键词按整个单词匹配（"this" 里的 "hi" 不算），中文按包含匹配。"""
     if keyword.isascii():
         return re.search(r"(?<![a-z])" + re.escape(keyword) + r"(?![a-z])", message_lower) is not None
     return keyword in message_lower
 
 
 def get_mock_response(message: str, turn_count: int = 0, affinity: int = 1) -> dict:
-    """Get a mock response based on message keywords."""
+    """按关键词挑一条回复；affinity 决定能不能说熟络阶段才解锁的版本。"""
     message_lower = message.lower()
 
     # 先比关键词长短，一样长再比 priority（话题 3 > 情绪/夸奖 2 > 招呼/泛问 1）
@@ -264,7 +265,7 @@ def get_mock_response(message: str, turn_count: int = 0, affinity: int = 1) -> d
             "photo": resp.get("photo"),  # 拿相机时那张照片的描述（配置了生图才会用到）
         }
 
-    # Default response
+    # 都没命中：按轮数轮流用默认回复
     resp = DEFAULT_RESPONSES[turn_count % len(DEFAULT_RESPONSES)]
     return {
         "text": resp["text"],
