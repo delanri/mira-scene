@@ -165,13 +165,8 @@ const app = createApp({
           characterState.value = 'idle';
           mouthState.value = '';
 
-          // 说完话后情绪渐回 neutral（眼睛恢复原样）
-          setTimeout(() => {
-            if (currentRequestId === requestId && characterState.value === 'idle') {
-              currentEmotion.value = 'neutral';
-              mouthState.value = '';
-            }
-          }, 3500);
+          // 语音说完立刻回 neutral（眼睛恢复原样），不等气泡消失
+          currentEmotion.value = 'neutral';
 
           // Start fade-out after 4 seconds
           subtitleFadeTimer = setTimeout(() => {

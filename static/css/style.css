@@ -343,7 +343,33 @@ html, body {
   50% { opacity: 0.4; }
 }
 
-/* Action: sip coffee — right hand lifts toward cup */
+/* show_photo: 左手捂嘴 */
+.character-container.show_photo .hand-l {
+  transform: translate(30px, -130px);
+}
+
+/* look_away（被夸）: 双手捂嘴 */
+.character-container.look_away .hand-l {
+  transform: translate(30px, -130px);
+}
+.character-container.look_away .hand-r {
+  transform: translate(-30px, -130px);
+}
+
+/* lean_forward（聊天气/雨）: 眨眨眼笑着说话 */
+.character-container.lean_forward .eye-shape {
+  animation: smile-blink 1.5s ease-in-out;
+}
+
+@keyframes smile-blink {
+  0%, 100% { ry: 6.5; }
+  20% { ry: 1; }
+  40% { ry: 6.5; }
+  60% { ry: 1; }
+  80% { ry: 5; }
+}
+
+/* sip_coffee（聊咖啡）: 右手举杯晃晃放回去 */
 .character-container.sip_coffee .hand-r {
   transform: translate(-30px, -20px);
 }
@@ -453,8 +479,19 @@ html, body {
   100% { opacity: 0; transform: translateY(-24px) scaleX(0.5); }
 }
 
+/* 咖啡杯：举起来晃一晃再放回去，2.5s 内完成 */
 .character-container.sip_coffee .coffee-cup {
-  transform: translateY(-8px) rotate(-12deg);
+  animation: coffee-sway 2.5s ease-in-out;
+}
+
+@keyframes coffee-sway {
+  0% { transform: translateY(0) rotate(0); }
+  20% { transform: translateY(-15px) rotate(-12deg); }
+  35% { transform: translateY(-12px) rotate(8deg); }
+  50% { transform: translateY(-14px) rotate(-5deg); }
+  65% { transform: translateY(-11px) rotate(4deg); }
+  80% { transform: translateY(-6px) rotate(-2deg); }
+  100% { transform: translateY(0) rotate(0); }
 }
 
 /* === Camera (on cafe table) === */
