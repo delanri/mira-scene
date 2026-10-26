@@ -49,6 +49,11 @@
                 <stop offset="0%" stop-color="#252542"/>
                 <stop offset="100%" stop-color="#1a1a2e"/>
               </radialGradient>
+              <radialGradient id="lens-g">
+                <stop offset="40%" stop-color="#1a1a2e"/>
+                <stop offset="60%" stop-color="#2a2a3a"/>
+                <stop offset="100%" stop-color="#4a4a5a"/>
+              </radialGradient>
               <filter id="clip-glow" x="-50%" y="-50%" width="200%" height="200%">
                 <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="g"/>
                 <feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
@@ -71,8 +76,8 @@
             <ellipse cx="100" cy="100" rx="44" ry="50" fill="url(#skin-g)"/>
 
             <!-- Cheek blush -->
-            <ellipse cx="72" cy="116" rx="10" ry="6" fill="#e8a090" opacity="0.25"/>
-            <ellipse cx="128" cy="116" rx="10" ry="6" fill="#e8a090" opacity="0.25"/>
+            <ellipse class="cheek" cx="72" cy="116" rx="10" ry="6" fill="#e8a090" opacity="0.25"/>
+            <ellipse class="cheek" cx="128" cy="116" rx="10" ry="6" fill="#e8a090" opacity="0.25"/>
 
             <!-- Side hair front wisps (脸前侧发丝) -->
             <path d="M54,88 C50,104 48,122 50,138" stroke="#1a1a2e" stroke-width="7" fill="none" stroke-linecap="round" opacity="0.45"/>
@@ -114,6 +119,14 @@
             <path d="M84,155 Q100,163 116,155" fill="none" stroke="#9a7e35" stroke-width="3" stroke-linecap="round"/>
             <rect x="92" y="151" width="16" height="9" rx="2" fill="url(#collar-grad)"/>
 
+            <!-- Camera（放在大衣之后、双手之前：拿起来时在身体前面、在手后面） -->
+            <g class="camera-g">
+              <rect x="94.5" y="267" width="9" height="4.5" rx="1.5" fill="#3a3a42"/>
+              <rect x="90" y="271" width="20" height="13" rx="2" fill="#3a3a42"/>
+              <line x1="91.5" y1="271.6" x2="108.5" y2="271.6" stroke="rgba(255,255,255,0.08)" stroke-width="0.8"/>
+              <circle cx="100" cy="277.5" r="3.6" fill="url(#lens-g)" stroke="#555" stroke-width="0.9"/>
+            </g>
+
             <!-- Hands -->
             <circle class="hand-l" cx="56" cy="275" r="12" fill="url(#skin-g)"/>
             <circle class="hand-r" cx="144" cy="275" r="12" fill="url(#skin-g)"/>
@@ -121,11 +134,6 @@
 
           <!-- Cafe table -->
           <div class="cafe-table">
-            <div class="camera">
-              <div class="camera-body">
-                <div class="camera-lens"></div>
-              </div>
-            </div>
             <div class="coffee-cup">
               <div class="steam"></div>
             </div>
@@ -187,16 +195,23 @@
       <div class="status-badge" :class="characterState">
         <span class="status-dot"></span>
         <span class="status-text">{{ statusText }}</span>
+        <!-- 好感度：3 颗星（和她的发夹同色），亮几颗 = 第几阶段 -->
+        <span class="affinity" :title="`好感度：${affinityName}`">
+          <span v-for="n in 3" :key="'aff-'+n" class="aff-star" :class="{ lit: n <= affinity }">✦</span>
+          <span class="aff-name">{{ affinityName }}</span>
+        </span>
       </div>
 
       <div class="subtitle-area" v-if="currentSubtitle">
         <div class="subtitle-box" :class="{ 'typing': isTypingSubtitle, 'rain-fade': isSubtitleFading }">
           <span class="subtitle-name">MIRA</span>
           <p class="subtitle-text">{{ displayedSubtitle }}</p>
+          <button class="retry-btn" v-if="retryText" @click="retryLast">再说一次</button>
         </div>
       </div>
 
       <div class="input-area">
+        <div class="input-hint" v-if="inputHint">{{ inputHint }}</div>
         <div class="input-container">
           <input type="text" v-model="userInput" @keydown.enter="sendMessage"
                  :placeholder="inputPlaceholder" :disabled="characterState === 'thinking'"
@@ -217,12 +232,14 @@
             </svg>
           </button>
         </div>
-        <div class="mode-badge">{{ apiMode === 'mock' ? '演示' : '在线' }}</div>
+        <div class="mode-badge" :class="apiMode"
+             :title="apiMode === 'fallback' ? '在线模型暂时连不上，这一轮用的是演示回复' : ''">{{ modeLabel }}</div>
       </div>
     </div>
   </div>
 
-  <script src="https://unpkg.com/vue@3.4.38/dist/vue.global.prod.js"></script>
+  <!-- Vue 放在本地（static/js/vue.global.prod.js, v3.4.38），不依赖外网 CDN，打开就能用 -->
+  <script src="/js/vue.global.prod.js"></script>
   <script src="/js/app.js"></script>
 </body>
 </html>

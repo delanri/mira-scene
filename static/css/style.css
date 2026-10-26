@@ -349,21 +349,66 @@ html, body {
 }
 
 /* show_photo（聊摄影）: 左手拿起相机举到胸口 */
-/* 手：弧形轨迹伸到相机左上角；停留位置写在 transform 上，
-   这样收回时走 .hand-l 的 transition，不会瞬间弹回 */
-.character-container.show_photo .hand-l {
-  transform: translate(38px, -60px);
-  animation: hand-reach-camera 0.8s ease-out;
-}
-.character-container.show_photo .camera {
-  transform: translate(-5px, -55px) rotate(-8deg);
-  transition: transform 0.7s ease-out;
+/* 相机在 SVG 里（index.html .camera-g），和手同一个坐标系，任何屏幕宽度都对得上。
+   握点 = 相机左上角 (87, 270)：手心落在这里，相机也绕这里转，转的时候不会脱手。
+   origin 写在基础状态上，放下时不会跳（发夹那个坑）。 */
+.camera-g {
+  transform-origin: 87px 270px;
+  transition: transform 0.5s ease;
 }
 
-@keyframes hand-reach-camera {
-  0% { transform: translate(0, 0); }
-  40% { transform: translate(28px, -35px); }
-  100% { transform: translate(38px, -60px); }
+/* 两段：0–45% 手伸过去（相机不动）→ 45–55% 握住停一下 → 55–100% 手和相机一起举到胸口
+   停留位置写在 transform 上，放下时走 transition 回原位 */
+.character-container.show_photo .hand-l {
+  transform: translate(38px, -60px);
+  animation: hand-pick-camera 1.3s ease-in-out;
+}
+.character-container.show_photo .camera-g {
+  transform: translate(7px, -55px) rotate(-8deg);
+  animation: camera-lift 1.3s ease-in-out;
+}
+
+@keyframes hand-pick-camera {
+  0%   { transform: translate(0, 0); }
+  20%  { transform: translate(15px, -16px); }  /* 稍微抬一点的弧线 */
+  45%  { transform: translate(31px, -5px); }   /* 到达相机左上角 */
+  55%  { transform: translate(31px, -5px); }   /* 握住 */
+  100% { transform: translate(38px, -60px); }  /* 举到胸口 */
+}
+
+@keyframes camera-lift {
+  0%   { transform: translate(0, 0) rotate(0deg); }
+  55%  { transform: translate(0, 0) rotate(0deg); }  /* 等手握住才动 */
+  100% { transform: translate(7px, -55px) rotate(-8deg); }
+}
+
+/* put_down_camera（app.js clearAction 切进来，1s 后清掉）：
+   0–50% 手和相机一起放回桌上 → 50–60% 松手停一下 → 60–100% 手收回（相机不动） */
+.character-container.put_down_camera .hand-l {
+  animation: hand-put-down-camera 1s ease-in-out;
+}
+.character-container.put_down_camera .camera-g {
+  animation: camera-put-down 1s ease-in-out;
+}
+
+@keyframes hand-put-down-camera {
+  0%   { transform: translate(38px, -60px); }
+  50%  { transform: translate(31px, -5px); }   /* 相机落回桌上 */
+  60%  { transform: translate(31px, -5px); }   /* 松手 */
+  80%  { transform: translate(15px, -16px); }
+  100% { transform: translate(0, 0); }
+}
+
+@keyframes camera-put-down {
+  0%   { transform: translate(7px, -55px) rotate(-8deg); }
+  50%  { transform: translate(0, 0) rotate(0deg); }
+  100% { transform: translate(0, 0) rotate(0deg); }
+}
+
+/* hand_to_mouth（打招呼 / 被问在等谁）: 左手抬到嘴边，犹豫、局促、话到嘴边又咽回去
+   位置沿用旧版 touch_hair_clip 的左手 translate(30px, -130px) */
+.character-container.hand_to_mouth .hand-l {
+  transform: translate(30px, -130px);
 }
 
 /* look_away（被夸）: 双手捂嘴 */
@@ -525,46 +570,7 @@ html, body {
   100% { transform: translateY(0) rotate(0); }
 }
 
-/* === Camera (on cafe table) === */
-.camera {
-  position: absolute;
-  right: 94px;
-  bottom: 7px;
-  transition: transform 0.5s ease;
-}
-
-.camera-body {
-  width: 22px;
-  height: 14px;
-  background: #3a3a42;
-  border-radius: 2px;
-  position: relative;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 1px 3px rgba(0,0,0,0.4);
-}
-
-.camera-body::before {
-  content: '';
-  position: absolute;
-  top: -4px;
-  left: 5px;
-  width: 10px;
-  height: 4px;
-  background: #3a3a42;
-  border-radius: 2px 2px 0 0;
-}
-
-.camera-lens {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: radial-gradient(circle, #1a1a2e 40%, #2a2a3a 60%, #4a4a5a 100%);
-  border: 1px solid #555;
-  box-shadow: inset 0 0 2px rgba(100,140,200,0.3);
-}
+/* === Camera：已移进 SVG（见 index.html .camera-g 和上面 show_photo 部分） === */
 
 /* === Emotion Particles === */
 .emotion-particles {
@@ -633,6 +639,15 @@ html, body {
 .character-container.melancholy {
   /* 情绪通过眼睛半闭表达，不位移整个容器 */
 }
+/* shy（害羞）: 脸颊慢慢变红 */
+.cheek {
+  transition: opacity 0.8s ease, fill 0.8s ease;
+}
+.character-container.shy .cheek {
+  opacity: 0.6;
+  fill: #ec8a82;
+}
+
 .character-container.melancholy .eye-shape {
   ry: 4.5;
   opacity: 0.7;
@@ -997,6 +1012,7 @@ html, body {
   color: var(--text-secondary);
   letter-spacing: 0.5px;
   transition: all 0.3s ease;
+  white-space: nowrap; /* left:50% 定位最多只有半屏宽，加了好感度后手机上会折行 */
 }
 
 .status-dot {
@@ -1245,6 +1261,72 @@ html, body {
   font-weight: 600;
 }
 
+/* 降级：在线模式但这一轮用了演示回复 → 暖橙色，比平时显眼一点 */
+.mode-badge.fallback {
+  color: rgba(232, 150, 80, 0.75);
+}
+
+/* === 好感度小标记（状态栏里，和发夹同色的 3 颗星） === */
+.affinity {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: 2px;
+  padding-left: 8px;
+  border-left: 1px solid rgba(255, 255, 255, 0.12);
+  line-height: 1.5;
+}
+
+.aff-star {
+  font-size: 9px;
+  color: rgba(192, 200, 216, 0.2);
+  transition: color 0.8s ease, text-shadow 0.8s ease;
+}
+
+.aff-star.lit {
+  color: #c0c8d8;
+  text-shadow: 0 0 4px rgba(192, 200, 216, 0.6);
+}
+
+.aff-name {
+  margin-left: 3px;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.4);
+  letter-spacing: 0.5px;
+}
+
+/* === 失败重试按钮（字幕里，Mira 说完“再说一遍？”后出现） === */
+.retry-btn {
+  margin-top: 8px;
+  padding: 4px 14px;
+  font-size: 12px;
+  line-height: 1.6;
+  font-family: inherit;
+  color: var(--accent);
+  background: rgba(201, 168, 76, 0.1);
+  border: 1px solid rgba(201, 168, 76, 0.35);
+  border-radius: 12px;
+  cursor: pointer;
+  pointer-events: auto; /* 字幕区整体是 pointer-events: none */
+  transition: background 0.2s ease;
+}
+
+.retry-btn:hover {
+  background: rgba(201, 168, 76, 0.2);
+}
+
+/* === 输入框上方的小提示（麦克风权限、浏览器不支持） === */
+.input-hint {
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  letter-spacing: 0.3px;
+  padding: 2px 12px;
+  background: rgba(10, 12, 18, 0.55);
+  border-radius: 10px;
+  animation: fade-in 0.3s ease;
+}
+
 /* === Responsive === */
 @media (max-width: 480px) {
   .shop-interior {
@@ -1259,8 +1341,10 @@ html, body {
     width: 180px;
   }
 
+  /* margin-top 跟着人物缩放（220px 时 -18px），桌面才会一直落在人物同一个高度，相机才不会悬空/被挡 */
   .cafe-table {
     width: 210px;
+    margin-top: -15px;
   }
 
   .subtitle-text {
@@ -1297,6 +1381,7 @@ html, body {
 
   .cafe-table {
     width: 180px;
+    margin-top: -13px;
   }
 
   .status-badge {
