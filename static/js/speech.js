@@ -90,12 +90,13 @@ export function createSpeech(ctx) {
         utterance.pitch = 1.1;
         utterance.lang = 'zh-CN';
 
-        // 尽量挑女声
+        // 挑中文声音：先找 Edge 的晓晓，没有就找任意 zh-CN，再没有就交给浏览器默认
         const voices = synth.getVoices();
-        const femaleVoice = voices.find((/** @type {{name: string}} */ v) =>
-          v.name.includes('Female') || v.name.includes('Samantha') ||
-          v.name.includes('Karen') || v.name.includes('Victoria'));
-        if (femaleVoice) utterance.voice = femaleVoice;
+        const isZhCN = (/** @type {{lang: string}} */ v) => /^zh[-_]CN$/i.test(v.lang);
+        const zhVoice =
+          voices.find((/** @type {{name: string, lang: string}} */ v) => isZhCN(v) && v.name.includes('Xiaoxiao')) ||
+          voices.find(isZhCN);
+        if (zhVoice) utterance.voice = zhVoice;
 
         // 字幕对齐：开始出声 → 对齐起点；念到哪个词 → 字幕跟到哪
         utterance.onstart = () => {

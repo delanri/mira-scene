@@ -247,7 +247,10 @@ Comfy Desktop 的端口不一定是 8188，以 ComfyUI 设置里的服务器端�
 
 ## 演示录屏
 
-【待补链接】
+3 分钟演示：文本交互 → 好感度与表情变化 → ComfyUI 生成照片 → 打断 → 生图失败降级 → /debug 观测页。
+
+- GitHub Release：https://github.com/delanri/mira-scene/releases/download/v1.0/Mira.mp4
+- 百度网盘备份：https://pan.baidu.com/s/1_fHZg2BW0oyei3KIXLDC4Q?pwd=mgwu （提取码 mgwu）
 
 ## 投入时间
 
